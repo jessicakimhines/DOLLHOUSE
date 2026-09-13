@@ -1,12 +1,19 @@
 /* =========================================================
-   DOLLHOUSE — Main App Script
+   DOLLHOUSE
+   Main JavaScript
+   ========================================================= */
+
+
+/* =========================================================
+   APP STATE
    ========================================================= */
 
 let scanTimer = null;
+
 let currentScan = null;
 let currentPropertyId = null;
 let currentViewingScan = null;
-let lastModelSource = "dashboardScreen";
+
 let selectedSubscription = null;
 
 
@@ -31,21 +38,22 @@ function showScreen(screenId) {
 
     closeMenu();
 
+    // Refresh information when entering certain screens
     if (screenId === "dashboardScreen") {
+        updateProfile();
         displaySavedScans();
-        updateDashboard();
     }
 
     if (screenId === "scansScreen") {
         renderAllProperties();
     }
 
-    if (screenId === "profileScreen") {
-        updateProfile();
-    }
-
     if (screenId === "propertyScreen") {
         renderPropertyDetails();
+    }
+
+    if (screenId === "profileScreen") {
+        updateProfile();
     }
 }
 
@@ -56,11 +64,9 @@ function showScreen(screenId) {
 
 function toggleMenu() {
 
-    const menu = document.getElementById("mainMenu");
+    const menu = document.getElementById("sideMenu");
 
-    if (!menu) {
-        return;
-    }
+    if (!menu) return;
 
     menu.classList.toggle("open");
 }
@@ -68,15 +74,17 @@ function toggleMenu() {
 
 function closeMenu() {
 
-    const menu = document.getElementById("mainMenu");
+    const menu = document.getElementById("sideMenu");
 
-    if (menu) {
-        menu.classList.remove("open");
-    }
+    if (!menu) return;
+
+    menu.classList.remove("open");
 }
 
 
 function navigateFromMenu(screenId) {
+
+    closeMenu();
     showScreen(screenId);
 }
 
@@ -87,46 +95,36 @@ function navigateFromMenu(screenId) {
 
 function createAccount() {
 
-    const emailInput =
-        document.getElementById("emailInput");
+    const emailInput = document.getElementById("emailInput");
+    const passwordInput = document.getElementById("passwordInput");
+    const termsInput = document.getElementById("termsCheckbox");
 
-    const passwordInput =
-        document.getElementById("passwordInput");
+    const email = emailInput
+        ? emailInput.value.trim()
+        : "";
 
-    const termsInput =
-        document.getElementById("termsCheckbox");
+    const password = passwordInput
+        ? passwordInput.value
+        : "";
 
-
-    const email =
-        emailInput
-            ? emailInput.value.trim()
-            : "";
-
-    const password =
-        passwordInput
-            ? passwordInput.value
-            : "";
-
-    const termsAccepted =
-        termsInput
-            ? termsInput.checked
-            : false;
+    const termsAccepted = termsInput
+        ? termsInput.checked
+        : false;
 
 
-    /* EMAIL */
+    // Email validation
+    const emailPattern =
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!email || !email.includes("@")) {
+    if (!emailPattern.test(email)) {
 
-        alert(
-            "Please enter a valid email address."
-        );
+        alert("Please enter a valid email address.");
 
         return;
     }
 
 
-    /* PASSWORD */
-
+    // Password validation
     if (password.length < 8) {
 
         alert(
@@ -137,8 +135,7 @@ function createAccount() {
     }
 
 
-    /* TERMS */
-
+    // Terms validation
     if (!termsAccepted) {
 
         alert(
@@ -149,8 +146,7 @@ function createAccount() {
     }
 
 
-    /* SAVE ACCOUNT */
-
+    // Save account
     localStorage.setItem(
         "dollhouseSignedIn",
         "true"
@@ -162,16 +158,26 @@ function createAccount() {
     );
 
 
+    // Make sure a new account starts FREE
+    if (
+        localStorage.getItem("dollhousePremium") === null
+    ) {
+
+        localStorage.setItem(
+            "dollhousePremium",
+            "false"
+        );
+    }
+
+
     updateProfile();
 
-    showScreen(
-        "dashboardScreen"
-    );
+    showScreen("dashboardScreen");
 }
 
 
 /* =========================================================
-   LOGOUT
+   LOG OUT
    ========================================================= */
 
 function logout() {
@@ -180,54 +186,174 @@ function logout() {
         "dollhouseSignedIn"
     );
 
-    localStorage.removeItem(
-        "dollhouseEmail"
-    );
-
-    currentPropertyId = null;
-    currentScan = null;
-    currentViewingScan = null;
-
-    showScreen(
-        "welcomeScreen"
-    );
+    showScreen("welcomeScreen");
 }
 
 
 /* =========================================================
-   DASHBOARD
+   PREMIUM / SUBSCRIPTION
    ========================================================= */
 
-function updateDashboard() {
+function isPremium() {
 
-    const plan =
+    return (
+        localStorage.getItem(
+            "dollhousePremium"
+        ) === "true"
+    );
+}
+
+
+function selectSubscription(plan) {
+
+    selectedSubscription = plan;
+
+    const cards =
+        document.querySelectorAll(
+            ".subscription-card"
+        );
+
+    cards.forEach(card => {
+        card.classList.remove("selected");
+    });
+
+
+    // Current HTML order:
+    // 0 = Weekly
+    // 1 = Monthly
+    // 2 = Yearly
+
+    const planIndexes = {
+        weekly: 0,
+        monthly: 1,
+        yearly: 2
+    };
+
+    const selectedIndex =
+        planIndexes[plan];
+
+
+    if (
+        selectedIndex !== undefined &&
+        cards[selectedIndex]
+    ) {
+
+        cards[selectedIndex]
+            .classList.add("selected");
+    }
+
+
+    const subscribeButton =
+        document.getElementById(
+            "subscribeButton"
+        );
+
+    if (subscribeButton) {
+
+        subscribeButton.textContent =
+            "ACTIVATE PREMIUM";
+    }
+}
+
+
+function activatePremium() {
+
+    if (!selectedSubscription) {
+
+        alert(
+            "Please choose a subscription plan first."
+        );
+
+        return;
+    }
+
+
+    // Save Premium status
+    localStorage.setItem(
+        "dollhousePremium",
+        "true"
+    );
+
+
+    // Save which plan was selected
+    localStorage.setItem(
+        "dollhouseSubscription",
+        selectedSubscription
+    );
+
+
+    // Update FREE/PREMIUM everywhere
+    updateProfile();
+
+
+    alert(
+        "Premium activated!"
+    );
+
+
+    // Return to home
+    showScreen("dashboardScreen");
+}
+
+
+/* =========================================================
+   PROFILE + CURRENT PLAN
+   ========================================================= */
+
+function updateProfile() {
+
+    const email =
+        localStorage.getItem(
+            "dollhouseEmail"
+        ) || "Account";
+
+
+    const premium = isPremium();
+
+
+    /* ---------- PROFILE SCREEN ---------- */
+
+    const profileEmail =
+        document.getElementById(
+            "profileEmail"
+        );
+
+    const profilePlan =
+        document.getElementById(
+            "profilePlan"
+        );
+
+
+    if (profileEmail) {
+
+        profileEmail.textContent =
+            email;
+    }
+
+
+    if (profilePlan) {
+
+        profilePlan.textContent =
+            premium
+                ? "PREMIUM PLAN"
+                : "FREE PLAN";
+    }
+
+
+    /* ---------- HOME / DASHBOARD ---------- */
+
+    const dashboardPlan =
         document.getElementById(
             "dashboardPlan"
         );
 
-    if (!plan) {
-        return;
-    }
 
-    if (isPremium()) {
+    if (dashboardPlan) {
 
-        const subscription =
-            localStorage.getItem(
-                "dollhousePlan"
-            );
-
-        plan.textContent =
-            "PREMIUM";
-
-        if (subscription) {
-            plan.textContent =
-                "PREMIUM";
-        }
-
-    } else {
-
-        plan.textContent =
-            "FREE";
+        dashboardPlan.textContent =
+            premium
+                ? "PREMIUM"
+                : "FREE";
     }
 }
 
@@ -244,122 +370,44 @@ function getProperties() {
         );
 
 
-    if (saved) {
+    if (!saved) {
 
-        try {
-
-            const parsed =
-                JSON.parse(saved);
-
-            if (Array.isArray(parsed)) {
-                return parsed;
-            }
-
-        } catch (error) {
-
-            console.log(
-                "Could not read saved properties."
-            );
-        }
+        return [];
     }
 
 
-    /* -----------------------------------------
-       Migrate older prototype scan data
-       ----------------------------------------- */
+    try {
 
-    const oldScans =
-        localStorage.getItem(
-            "dollhouseScans"
+        const properties =
+            JSON.parse(saved);
+
+
+        if (!Array.isArray(properties)) {
+
+            return [];
+        }
+
+
+        return properties.map(property => {
+
+            if (!property.scans) {
+
+                property.scans = [];
+            }
+
+            return property;
+        });
+
+
+    } catch (error) {
+
+        console.error(
+            "Could not load properties:",
+            error
         );
 
-
-    if (oldScans) {
-
-        try {
-
-            const scans =
-                JSON.parse(oldScans);
-
-
-            if (
-                Array.isArray(scans) &&
-                scans.length > 0
-            ) {
-
-                const migratedProperty = {
-
-                    id:
-                        "property-" +
-                        Date.now(),
-
-                    name:
-                        "Imported Property",
-
-                    createdAt:
-                        new Date().toISOString(),
-
-                    scans:
-                        scans.map(
-                            (scan, index) => ({
-
-                                id:
-                                    scan.id ||
-                                    "scan-" +
-                                    Date.now() +
-                                    "-" +
-                                    index,
-
-                                date:
-                                    scan.date ||
-                                    new Date().toISOString(),
-
-                                rooms:
-                                    scan.rooms ||
-                                    0,
-
-                                objects:
-                                    scan.objects ||
-                                    0,
-
-                                squareFeet:
-                                    scan.squareFeet ||
-                                    0,
-
-                                modelVersion:
-                                    scan.modelVersion ||
-                                    1
-                            })
-                        )
-                };
-
-
-                const properties = [
-                    migratedProperty
-                ];
-
-
-                localStorage.setItem(
-                    "dollhouseProperties",
-                    JSON.stringify(
-                        properties
-                    )
-                );
-
-
-                return properties;
-            }
-
-        } catch (error) {
-
-            console.log(
-                "No old scan data to migrate."
-            );
-        }
+        return [];
     }
-
-
-    return [];
 }
 
 
@@ -376,47 +424,13 @@ function saveProperties(properties) {
    START SCAN
    ========================================================= */
 
-function startScan() {
+function startScan(propertyId = null) {
 
-    const activeScreen =
-        document.querySelector(
-            ".screen.active"
-        );
+    currentPropertyId =
+        propertyId || null;
 
 
-    let targetProperty = null;
-
-
-    /*
-       If scanning from an existing property,
-       add the new scan to that property.
-    */
-
-    if (
-        activeScreen &&
-        activeScreen.id ===
-            "propertyScreen" &&
-        currentPropertyId
-    ) {
-
-        const properties =
-            getProperties();
-
-
-        targetProperty =
-            properties.find(
-                property =>
-                    property.id ===
-                    currentPropertyId
-            );
-    }
-
-
-    /*
-       Otherwise create a new property.
-    */
-
-    if (!targetProperty) {
+    if (!currentPropertyId) {
 
         const propertyName =
             prompt(
@@ -424,44 +438,54 @@ function startScan() {
             );
 
 
-        if (propertyName === null) {
+        if (!propertyName) {
+
             return;
         }
 
 
-        const cleanName =
-            propertyName.trim();
+        const properties =
+            getProperties();
 
 
-        currentScan = {
+        const newProperty = {
 
-            newPropertyName:
-                cleanName.length > 0
-                    ? cleanName
-                    : "New Property"
+            id:
+                Date.now().toString(),
+
+            name:
+                propertyName.trim(),
+
+            createdAt:
+                new Date().toISOString(),
+
+            scans: []
         };
 
 
-        currentPropertyId = null;
+        properties.push(
+            newProperty
+        );
+
+
+        saveProperties(
+            properties
+        );
+
+
+        currentPropertyId =
+            newProperty.id;
     }
-
-
-    currentViewingScan = null;
-
-
-    showScreen(
-        "scannerScreen"
-    );
 
 
     resetScanner();
 
+    showScreen("scannerScreen");
 
-    setTimeout(() => {
-
-        beginScanning();
-
-    }, 500);
+    setTimeout(
+        beginScanning,
+        500
+    );
 }
 
 
@@ -471,62 +495,6 @@ function startScan() {
 
 function resetScanner() {
 
-    const progress =
-        document.getElementById(
-            "scanProgress"
-        );
-
-    const percent =
-        document.getElementById(
-            "scanPercent"
-        );
-
-    const status =
-        document.getElementById(
-            "scanStatus"
-        );
-
-    const rooms =
-        document.getElementById(
-            "roomCount"
-        );
-
-    const objects =
-        document.getElementById(
-            "objectCount"
-        );
-
-
-    if (progress) {
-        progress.style.width =
-            "0%";
-    }
-
-
-    if (percent) {
-        percent.textContent =
-            "0%";
-    }
-
-
-    if (status) {
-        status.textContent =
-            "Preparing Scanner";
-    }
-
-
-    if (rooms) {
-        rooms.textContent =
-            "0";
-    }
-
-
-    if (objects) {
-        objects.textContent =
-            "0";
-    }
-
-
     if (scanTimer) {
 
         clearInterval(
@@ -535,95 +503,28 @@ function resetScanner() {
 
         scanTimer = null;
     }
-}
 
 
-/* =========================================================
-   SIMULATED SCANNING
-   ========================================================= */
+    currentScan = {
 
-function beginScanning() {
+        rooms: 0,
 
-    let progress = 0;
+        objects: 0,
 
+        size: 0,
 
-    const statusMessages = [
-
-        "Initializing spatial scan...",
-
-        "Mapping walls and surfaces...",
-
-        "Detecting rooms...",
-
-        "Analyzing objects...",
-
-        "Mapping doors and windows...",
-
-        "Capturing property geometry...",
-
-        "Building 3D environment...",
-
-        "Finalizing DOLLHOUSE model..."
-    ];
+        progress: 0
+    };
 
 
-    scanTimer =
-        setInterval(() => {
-
-            progress +=
-                Math.floor(
-                    Math.random() * 7
-                ) + 4;
-
-
-            if (progress > 100) {
-                progress = 100;
-            }
-
-
-            updateScanner(
-                progress,
-                statusMessages
-            );
-
-
-            if (progress >= 100) {
-
-                clearInterval(
-                    scanTimer
-                );
-
-                scanTimer = null;
-
-
-                setTimeout(() => {
-
-                    finishScan();
-
-                }, 600);
-            }
-
-        }, 250);
-}
-
-
-/* =========================================================
-   UPDATE SCANNER
-   ========================================================= */
-
-function updateScanner(
-    progress,
-    statusMessages
-) {
-
-    const progressBar =
+    const percentage =
         document.getElementById(
-            "scanProgress"
+            "scanPercentage"
         );
 
-    const percent =
+    const progress =
         document.getElementById(
-            "scanPercent"
+            "scanProgress"
         );
 
     const status =
@@ -647,78 +548,212 @@ function updateScanner(
         );
 
 
-    if (progressBar) {
+    if (percentage) {
 
-        progressBar.style.width =
-            progress + "%";
+        percentage.textContent =
+            "0%";
     }
 
 
-    if (percent) {
+    if (progress) {
 
-        percent.textContent =
-            progress + "%";
+        progress.style.width =
+            "0%";
     }
-
-
-    const messageIndex =
-        Math.min(
-            Math.floor(
-                progress / 14
-            ),
-            statusMessages.length - 1
-        );
 
 
     if (status) {
 
         status.textContent =
-            statusMessages[
-                messageIndex
-            ];
+            "Preparing Scanner";
     }
 
 
     if (instructions) {
 
-        if (progress < 30) {
-
-            instructions.textContent =
-                "Move slowly around the property.";
-
-        } else if (progress < 70) {
-
-            instructions.textContent =
-                "Continue moving through the property.";
-
-        } else {
-
-            instructions.textContent =
-                "Finishing the property model...";
-        }
+        instructions.textContent =
+            "Move slowly around the property.";
     }
 
-
-    /* Simulated prototype data */
 
     if (rooms) {
 
         rooms.textContent =
-            Math.max(
-                1,
-                Math.floor(
-                    progress / 12
-                )
-            );
+            "ROOMS: 0";
     }
 
 
     if (objects) {
 
         objects.textContent =
-            Math.floor(
-                progress * 0.8
+            "OBJECTS: 0";
+    }
+}
+
+
+/* =========================================================
+   BEGIN SCANNING
+   ========================================================= */
+
+function beginScanning() {
+
+    if (!currentScan) {
+
+        resetScanner();
+    }
+
+
+    const status =
+        document.getElementById(
+            "scanStatus"
+        );
+
+    const instructions =
+        document.getElementById(
+            "scanInstructions"
+        );
+
+
+    if (status) {
+
+        status.textContent =
+            "Scanning Property";
+    }
+
+
+    if (instructions) {
+
+        instructions.textContent =
+            "Move slowly around the property.";
+    }
+
+
+    let progress = 0;
+
+
+    scanTimer =
+        setInterval(() => {
+
+            progress += 2;
+
+
+            if (progress > 100) {
+
+                progress = 100;
+            }
+
+
+            updateScanner(
+                progress
             );
+
+
+            if (progress >= 100) {
+
+                clearInterval(
+                    scanTimer
+                );
+
+                scanTimer = null;
+
+                finishScan();
+            }
+
+        }, 100);
+}
+
+
+/* =========================================================
+   UPDATE SCANNER
+   ========================================================= */
+
+function updateScanner(progress) {
+
+    if (!currentScan) {
+
+        currentScan = {};
+    }
+
+
+    currentScan.progress =
+        progress;
+
+
+    // Simulated room/object discovery
+    const rooms =
+        Math.max(
+            1,
+            Math.floor(
+                progress / 25
+            )
+        );
+
+
+    const objects =
+        Math.floor(
+            progress * 0.8
+        );
+
+
+    currentScan.rooms =
+        rooms;
+
+    currentScan.objects =
+        objects;
+
+
+    currentScan.size =
+        Math.round(
+            800 + progress * 15
+        );
+
+
+    const percentage =
+        document.getElementById(
+            "scanPercentage"
+        );
+
+    const progressBar =
+        document.getElementById(
+            "scanProgress"
+        );
+
+    const roomCount =
+        document.getElementById(
+            "roomCount"
+        );
+
+    const objectCount =
+        document.getElementById(
+            "objectCount"
+        );
+
+
+    if (percentage) {
+
+        percentage.textContent =
+            `${progress}%`;
+    }
+
+
+    if (progressBar) {
+
+        progressBar.style.width =
+            `${progress}%`;
+    }
+
+
+    if (roomCount) {
+
+        roomCount.textContent =
+            `ROOMS: ${rooms}`;
+    }
+
+
+    if (objectCount) {
+
+        objectCount.textContent =
+            `OBJECTS: ${objects}`;
     }
 }
 
@@ -729,128 +764,95 @@ function updateScanner(
 
 function finishScan() {
 
-    const rooms =
-        Math.max(
-            1,
-            Math.floor(
-                Math.random() * 7
-            ) + 4
-        );
-
-
-    const objects =
-        Math.floor(
-            Math.random() * 80
-        ) + 40;
-
-
-    const squareFeet =
-        Math.floor(
-            Math.random() * 1800
-        ) + 900;
-
-
-    currentScan = {
-
-        id:
-            "scan-" +
-            Date.now(),
-
-        date:
-            new Date().toISOString(),
-
-        rooms:
-            rooms,
-
-        objects:
-            objects,
-
-        squareFeet:
-            squareFeet,
-
-        modelVersion:
-            1
-    };
-
-
-    currentViewingScan =
-        currentScan;
-
-
-    const resultRooms =
+    const status =
         document.getElementById(
-            "modelRooms"
+            "scanStatus"
         );
 
-    const resultObjects =
+    const instructions =
         document.getElementById(
-            "modelObjects"
-        );
-
-    const resultSize =
-        document.getElementById(
-            "modelSize"
-        );
-
-    const modelTitle =
-        document.getElementById(
-            "modelTitle"
-        );
-
-    const modelDate =
-        document.getElementById(
-            "modelDate"
+            "scanInstructions"
         );
 
 
-    if (resultRooms) {
-        resultRooms.textContent =
-            rooms;
+    if (status) {
+
+        status.textContent =
+            "Scan Complete";
     }
 
 
-    if (resultObjects) {
-        resultObjects.textContent =
-            objects;
+    if (instructions) {
+
+        instructions.textContent =
+            "Your property model is ready.";
     }
 
 
-    if (resultSize) {
+    if (!currentScan) {
 
-        resultSize.textContent =
-            squareFeet.toLocaleString() +
-            " sq ft";
+        currentScan = {
+
+            rooms: 1,
+
+            objects: 0,
+
+            size: 800,
+
+            progress: 100
+        };
     }
 
 
-    if (modelTitle) {
+    currentScan.date =
+        new Date().toISOString();
 
-        modelTitle.textContent =
-            currentScan.newPropertyName
-                ? currentScan.newPropertyName +
-                  " — 3D Model"
-                : "Scan Complete";
+
+    currentScan.id =
+        Date.now().toString();
+
+
+    updateModelScreen();
+
+    showScreen("modelScreen");
+}
+
+
+/* =========================================================
+   UPDATE MODEL SCREEN
+   ========================================================= */
+
+function updateModelScreen() {
+
+    const finalRooms =
+        document.getElementById(
+            "finalRooms"
+        );
+
+    const finalObjects =
+        document.getElementById(
+            "finalObjects"
+        );
+
+
+    if (!currentScan) {
+
+        return;
     }
 
 
-    if (modelDate) {
+    if (finalRooms) {
 
-        modelDate.textContent =
-            formatDate(
-                currentScan.date
-            );
+        finalRooms.textContent =
+            currentScan.rooms || 1;
     }
 
 
-    lastModelSource =
-        currentPropertyId
-            ? "propertyScreen"
-            : "dashboardScreen";
+    if (finalObjects) {
 
-
-    showScreen(
-        "modelScreen"
-    );
+        finalObjects.textContent =
+            currentScan.objects || 0;
+    }
 }
 
 
@@ -874,35 +876,35 @@ function saveScan() {
         getProperties();
 
 
-    let property = null;
+    let property =
+        properties.find(
+            p =>
+                p.id ===
+                currentPropertyId
+        );
 
-
-    if (currentPropertyId) {
-
-        property =
-            properties.find(
-                item =>
-                    item.id ===
-                    currentPropertyId
-            );
-    }
-
-
-    /*
-       Create a new property if necessary.
-    */
 
     if (!property) {
+
+        const propertyName =
+            prompt(
+                "Enter a property name:"
+            );
+
+
+        if (!propertyName) {
+
+            return;
+        }
+
 
         property = {
 
             id:
-                "property-" +
-                Date.now(),
+                Date.now().toString(),
 
             name:
-                currentScan.newPropertyName ||
-                "New Property",
+                propertyName.trim(),
 
             createdAt:
                 new Date().toISOString(),
@@ -911,39 +913,40 @@ function saveScan() {
         };
 
 
-        currentPropertyId =
-            property.id;
-
-
-        properties.unshift(
+        properties.push(
             property
         );
+
+
+        currentPropertyId =
+            property.id;
+    }
+
+
+    if (!property.scans) {
+
+        property.scans = [];
     }
 
 
     const scanToSave = {
 
+        ...currentScan,
+
         id:
-            currentScan.id,
+            currentScan.id ||
+            Date.now().toString(),
 
         date:
-            currentScan.date,
+            currentScan.date ||
+            new Date().toISOString(),
 
-        rooms:
-            currentScan.rooms,
-
-        objects:
-            currentScan.objects,
-
-        squareFeet:
-            currentScan.squareFeet,
-
-        modelVersion:
-            currentScan.modelVersion
+        propertyId:
+            property.id
     };
 
 
-    property.scans.unshift(
+    property.scans.push(
         scanToSave
     );
 
@@ -956,23 +959,15 @@ function saveScan() {
     currentScan =
         scanToSave;
 
-    currentViewingScan =
-        scanToSave;
+
+    alert(
+        "Scan saved successfully!"
+    );
 
 
     renderAllProperties();
 
     displaySavedScans();
-
-    renderPropertyDetails();
-
-
-    alert(
-        "Scan saved to " +
-        property.name +
-        "."
-    );
-
 
     showScreen(
         "propertyScreen"
@@ -981,7 +976,7 @@ function saveScan() {
 
 
 /* =========================================================
-   MY SCANS
+   RENDER ALL PROPERTIES
    ========================================================= */
 
 function renderAllProperties() {
@@ -993,6 +988,7 @@ function renderAllProperties() {
 
 
     if (!container) {
+
         return;
     }
 
@@ -1004,22 +1000,9 @@ function renderAllProperties() {
     if (properties.length === 0) {
 
         container.innerHTML = `
-
-            <div class="empty-state">
-
-                <div class="empty-icon">
-                    ◇
-                </div>
-
-                <h3>No properties yet</h3>
-
-                <p>
-                    Create your first property scan
-                    to get started.
-                </p>
-
-            </div>
-
+            <p class="empty-message">
+                No properties yet.
+            </p>
         `;
 
         return;
@@ -1030,21 +1013,6 @@ function renderAllProperties() {
         properties.map(
             property => {
 
-                const latestScan =
-                    property.scans &&
-                    property.scans.length
-                        ? property.scans[0]
-                        : null;
-
-
-                const dateText =
-                    latestScan
-                        ? formatDate(
-                              latestScan.date
-                          )
-                        : "No scans";
-
-
                 const scanCount =
                     property.scans
                         ? property.scans.length
@@ -1052,46 +1020,27 @@ function renderAllProperties() {
 
 
                 return `
-
                     <div
                         class="property-card"
                         onclick="openProperty('${property.id}')"
                     >
 
-                        <div class="property-card-icon">
-                            ◈
-                        </div>
-
-                        <div class="property-card-info">
-
+                        <div>
                             <h3>
-                                ${escapeHTML(
-                                    property.name
-                                )}
+                                ${escapeHTML(property.name)}
                             </h3>
 
                             <p>
                                 ${scanCount}
-                                ${
-                                    scanCount === 1
-                                        ? "scan"
-                                        : "scans"
-                                }
+                                ${scanCount === 1 ? "scan" : "scans"}
                             </p>
-
-                            <span>
-                                Last scanned:
-                                ${dateText}
-                            </span>
-
                         </div>
 
-                        <div class="property-card-arrow">
+                        <span>
                             →
-                        </div>
+                        </span>
 
                     </div>
-
                 `;
             }
         ).join("");
@@ -1099,7 +1048,7 @@ function renderAllProperties() {
 
 
 /* =========================================================
-   DASHBOARD SAVED PROPERTIES
+   DASHBOARD SAVED SCANS
    ========================================================= */
 
 function displaySavedScans() {
@@ -1111,6 +1060,7 @@ function displaySavedScans() {
 
 
     if (!container) {
+
         return;
     }
 
@@ -1119,93 +1069,84 @@ function displaySavedScans() {
         getProperties();
 
 
-    if (properties.length === 0) {
+    const scans = [];
+
+
+    properties.forEach(
+        property => {
+
+            if (
+                property.scans &&
+                property.scans.length
+            ) {
+
+                property.scans.forEach(
+                    scan => {
+
+                        scans.push({
+
+                            ...scan,
+
+                            propertyName:
+                                property.name
+                        });
+                    }
+                );
+            }
+        }
+    );
+
+
+    if (scans.length === 0) {
 
         container.innerHTML = `
-
-            <div class="empty-state">
-
-                <div class="empty-icon">
-                    ◇
-                </div>
-
-                <p>
-                    Your saved properties
-                    will appear here.
-                </p>
-
-            </div>
-
+            <p class="empty-message">
+                No saved scans yet.
+            </p>
         `;
 
         return;
     }
 
 
-    const recentProperties =
-        properties.slice(0, 3);
+    // Show newest scans first
+    scans.sort(
+        (a, b) =>
+            new Date(b.date) -
+            new Date(a.date)
+    );
 
 
     container.innerHTML =
-        recentProperties.map(
-            property => {
-
-                const latestScan =
-                    property.scans &&
-                    property.scans.length
-                        ? property.scans[0]
-                        : null;
-
-
-                return `
-
+        scans
+            .slice(0, 3)
+            .map(
+                scan => `
                     <div
-                        class="property-card"
-                        onclick="openProperty('${property.id}')"
+                        class="saved-scan-card"
+                        onclick="viewHistoricalScan('${scan.propertyId}', '${scan.id}')"
                     >
 
-                        <div class="property-card-icon">
-                            ◈
-                        </div>
-
-                        <div class="property-card-info">
+                        <div>
 
                             <h3>
-                                ${escapeHTML(
-                                    property.name
-                                )}
+                                ${escapeHTML(scan.propertyName)}
                             </h3>
 
                             <p>
-                                ${property.scans.length}
-                                scan${
-                                    property.scans.length === 1
-                                        ? ""
-                                        : "s"
-                                }
+                                ${formatDate(scan.date)}
                             </p>
 
-                            <span>
-                                ${
-                                    latestScan
-                                        ? formatDate(
-                                              latestScan.date
-                                          )
-                                        : "No scans"
-                                }
-                            </span>
-
                         </div>
 
-                        <div class="property-card-arrow">
+                        <span>
                             →
-                        </div>
+                        </span>
 
                     </div>
-
-                `;
-            }
-        ).join("");
+                `
+            )
+            .join("");
 }
 
 
@@ -1213,16 +1154,12 @@ function displaySavedScans() {
    OPEN PROPERTY
    ========================================================= */
 
-function openProperty(
-    propertyId
-) {
+function openProperty(propertyId) {
 
     currentPropertyId =
         propertyId;
 
-
     renderPropertyDetails();
-
 
     showScreen(
         "propertyScreen"
@@ -1236,44 +1173,44 @@ function openProperty(
 
 function renderPropertyDetails() {
 
-    if (!currentPropertyId) {
-        return;
-    }
-
-
     const properties =
         getProperties();
 
 
     const property =
         properties.find(
-            item =>
-                item.id ===
+            p =>
+                p.id ===
                 currentPropertyId
         );
 
 
     if (!property) {
+
         return;
     }
 
 
-    const title =
+    const scans =
+        property.scans || [];
+
+
+    const propertyTitle =
         document.getElementById(
             "propertyTitle"
         );
 
-    const subtitle =
+    const propertySubtitle =
         document.getElementById(
             "propertySubtitle"
         );
 
-    const nameDisplay =
+    const propertyNameDisplay =
         document.getElementById(
             "propertyNameDisplay"
         );
 
-    const stats =
+    const propertyStats =
         document.getElementById(
             "propertyStats"
         );
@@ -1284,180 +1221,105 @@ function renderPropertyDetails() {
         );
 
 
-    if (title) {
+    if (propertyTitle) {
 
-        title.textContent =
+        propertyTitle.textContent =
             property.name;
     }
 
 
-    if (subtitle) {
+    if (propertySubtitle) {
 
-        subtitle.textContent =
-            property.scans.length +
-            (
-                property.scans.length === 1
-                    ? " saved scan"
-                    : " saved scans"
-            );
+        propertySubtitle.textContent =
+            "Property history";
     }
 
 
-    if (nameDisplay) {
+    if (propertyNameDisplay) {
 
-        nameDisplay.textContent =
+        propertyNameDisplay.textContent =
             property.name;
     }
 
 
-    const latest =
-        property.scans[0];
+    if (propertyStats) {
 
-
-    if (stats) {
-
-        if (latest) {
-
-            stats.innerHTML = `
-
-                <div>
-
-                    <strong>
-                        ${latest.rooms}
-                    </strong>
-
-                    <span>
-                        Rooms
-                    </span>
-
-                </div>
-
-                <div>
-
-                    <strong>
-                        ${latest.objects}
-                    </strong>
-
-                    <span>
-                        Objects
-                    </span>
-
-                </div>
-
-                <div>
-
-                    <strong>
-                        ${latest.squareFeet.toLocaleString()}
-                    </strong>
-
-                    <span>
-                        Sq Ft
-                    </span>
-
-                </div>
-
-            `;
-
-        } else {
-
-            stats.innerHTML =
-                "No scan information";
-        }
+        propertyStats.textContent =
+            `${scans.length} ${
+                scans.length === 1
+                    ? "scan"
+                    : "scans"
+            } saved`;
     }
 
 
-    if (history) {
+    if (!history) {
 
-        if (
-            !property.scans ||
-            property.scans.length === 0
-        ) {
+        return;
+    }
 
-            history.innerHTML = `
 
-                <div class="empty-state">
+    if (scans.length === 0) {
 
-                    <p>
-                        No scans have been saved
-                        for this property.
-                    </p>
+        history.innerHTML = `
+            <p class="empty-message">
+                No scan history.
+            </p>
+        `;
 
-                </div>
+        return;
+    }
 
-            `;
 
-        } else {
+    history.innerHTML =
+        scans
+            .slice()
+            .reverse()
+            .map(
+                scan => `
+                    <div
+                        class="history-card"
+                        onclick="viewHistoricalScan('${property.id}', '${scan.id}')"
+                    >
 
-            history.innerHTML =
-                property.scans.map(
-                    (scan, index) => `
+                        <div>
 
-                        <div class="history-card">
+                            <strong>
+                                ${formatDate(scan.date)}
+                            </strong>
 
-                            <div class="history-date">
-
-                                ${formatDate(
-                                    scan.date
-                                )}
-
-                            </div>
-
-                            <div class="history-info">
-
-                                <span>
-                                    ${scan.rooms}
-                                    rooms
-                                </span>
-
-                                <span>
-                                    ${scan.objects}
-                                    objects
-                                </span>
-
-                                <span>
-                                    ${scan.squareFeet.toLocaleString()}
-                                    sq ft
-                                </span>
-
-                            </div>
-
-                            <button
-                                class="secondary-button"
-                                type="button"
-                                onclick="viewHistoricalScan(
-                                    '${property.id}',
-                                    '${scan.id}'
-                                )"
-                            >
-
-                                ${
-                                    index === 0
-                                        ? "VIEW 3D MODEL"
-                                        : "VIEW HISTORICAL MODEL"
-                                }
-
-                            </button>
+                            <p>
+                                ${scan.rooms || 0} rooms
+                                ·
+                                ${scan.objects || 0} objects
+                            </p>
 
                         </div>
 
-                    `
-                ).join("");
-        }
-    }
+                        <span>
+                            →
+                        </span>
+
+                    </div>
+                `
+            )
+            .join("");
 
 
     updatePropertyAI(
-        property
+        property,
+        scans
     );
 }
 
 
 /* =========================================================
-   PROPERTY AI
+   PROPERTY AI SUMMARY
    ========================================================= */
 
 function updatePropertyAI(
-    property
+    property,
+    scans
 ) {
 
     const changeSummary =
@@ -1476,190 +1338,55 @@ function updatePropertyAI(
         );
 
 
-    const premium =
-        isPremium();
+    if (!property || !scans) {
+
+        return;
+    }
 
 
-    if (!premium) {
+    if (scans.length < 2) {
 
         if (changeSummary) {
 
             changeSummary.textContent =
-                "Premium feature — compare scans from different dates.";
-        }
-
-
-        if (maintenanceSummary) {
-
-            maintenanceSummary.textContent =
-                "Premium feature — get AI-generated maintenance suggestions.";
-        }
-
-
-        if (propertyAISummary) {
-
-            propertyAISummary.textContent =
-                "Premium unlocks detailed property intelligence.";
-        }
-
-
-        return;
-    }
-
-
-    if (
-        !property.scans ||
-        property.scans.length === 0
-    ) {
-        return;
-    }
-
-
-    const latest =
-        property.scans[0];
-
-
-    if (
-        property.scans.length >= 2
-    ) {
-
-        const previous =
-            property.scans[1];
-
-
-        const roomDifference =
-            latest.rooms -
-            previous.rooms;
-
-
-        const objectDifference =
-            latest.objects -
-            previous.objects;
-
-
-        const roomText =
-            roomDifference === 0
-
-                ? "The room count is unchanged."
-
-                : roomDifference > 0
-
-                    ? `The latest scan identifies ${roomDifference} additional room${
-                        roomDifference === 1
-                            ? ""
-                            : "s"
-                    }.`
-
-                    : `The latest scan identifies ${Math.abs(
-                        roomDifference
-                    )} fewer room${
-                        Math.abs(
-                            roomDifference
-                        ) === 1
-                            ? ""
-                            : "s"
-                    }.`;
-
-
-
-        const objectText =
-            objectDifference === 0
-
-                ? "Object detection is similar."
-
-                : objectDifference > 0
-
-                    ? `The scan detected approximately ${objectDifference} more objects.`
-
-                    : `The scan detected approximately ${Math.abs(
-                        objectDifference
-                    )} fewer objects.`;
-
-
-
-        if (changeSummary) {
-
-            changeSummary.innerHTML = `
-
-                <strong>
-                    AI Change Summary
-                </strong>
-
-                <p>
-                    ${roomText}
-                    ${objectText}
-                    Review the historical 3D models
-                    for a closer comparison.
-                </p>
-
-            `;
+                "Save another scan to compare changes over time.";
         }
 
     } else {
 
         if (changeSummary) {
 
-            changeSummary.innerHTML = `
-
-                <strong>
-                    AI Change Summary
-                </strong>
-
-                <p>
-                    Complete another scan of this
-                    property to unlock date-to-date
-                    change analysis.
-                </p>
-
-            `;
+            changeSummary.textContent =
+                "DOLLHOUSE can compare historical scans to identify changes between property scans.";
         }
     }
 
 
     if (maintenanceSummary) {
 
-        maintenanceSummary.innerHTML = `
-
-            <strong>
-                AI Maintenance Check
-            </strong>
-
-            <p>
-                Review walls, doors, windows,
-                fixtures, and other property elements
-                during your next inspection.
-                DOLLHOUSE can organize areas that
-                may need attention.
-            </p>
-
-        `;
+        maintenanceSummary.textContent =
+            "AI maintenance suggestions will be generated from property scan data.";
     }
 
 
     if (propertyAISummary) {
 
-        propertyAISummary.innerHTML = `
+        if (isPremium()) {
 
-            <strong>
-                AI Property Summary
-            </strong>
+            propertyAISummary.textContent =
+                "Premium AI property analysis is available for this property.";
 
-            <p>
-                ${latest.rooms} rooms and approximately
-                ${latest.squareFeet.toLocaleString()}
-                square feet were identified in the
-                latest scan.
-                Use historical scans to monitor
-                the property over time.
-            </p>
+        } else {
 
-        `;
+            propertyAISummary.textContent =
+                "Upgrade to Premium to unlock advanced AI property analysis.";
+        }
     }
 }
 
 
 /* =========================================================
-   HISTORICAL SCANS
+   VIEW HISTORICAL SCAN
    ========================================================= */
 
 function viewHistoricalScan(
@@ -1667,46 +1394,35 @@ function viewHistoricalScan(
     scanId
 ) {
 
-    if (!isPremium()) {
-
-        alert(
-            "Historical scan viewing and property comparison are Premium features."
-        );
-
-        showScreen(
-            "premiumScreen"
-        );
-
-        return;
-    }
-
-
     const properties =
         getProperties();
 
 
     const property =
         properties.find(
-            item =>
-                item.id ===
+            p =>
+                p.id ===
                 propertyId
         );
 
 
     if (!property) {
+
         return;
     }
 
 
     const scan =
-        property.scans.find(
-            item =>
-                item.id ===
-                scanId
-        );
+        (property.scans || [])
+            .find(
+                s =>
+                    s.id ===
+                    scanId
+            );
 
 
     if (!scan) {
+
         return;
     }
 
@@ -1717,94 +1433,15 @@ function viewHistoricalScan(
     currentViewingScan =
         scan;
 
-    lastModelSource =
-        "propertyScreen";
+    currentScan =
+        scan;
 
 
-    updateModelScreen(
-        property,
-        scan
-    );
-
+    updateModelScreen();
 
     showScreen(
         "modelScreen"
     );
-}
-
-
-/* =========================================================
-   MODEL SCREEN
-   ========================================================= */
-
-function updateModelScreen(
-    property,
-    scan
-) {
-
-    const modelTitle =
-        document.getElementById(
-            "modelTitle"
-        );
-
-    const modelDate =
-        document.getElementById(
-            "modelDate"
-        );
-
-    const modelRooms =
-        document.getElementById(
-            "modelRooms"
-        );
-
-    const modelObjects =
-        document.getElementById(
-            "modelObjects"
-        );
-
-    const modelSize =
-        document.getElementById(
-            "modelSize"
-        );
-
-
-    if (modelTitle) {
-
-        modelTitle.textContent =
-            property.name +
-            " — 3D Model";
-    }
-
-
-    if (modelDate) {
-
-        modelDate.textContent =
-            formatDate(
-                scan.date
-            );
-    }
-
-
-    if (modelRooms) {
-
-        modelRooms.textContent =
-            scan.rooms;
-    }
-
-
-    if (modelObjects) {
-
-        modelObjects.textContent =
-            scan.objects;
-    }
-
-
-    if (modelSize) {
-
-        modelSize.textContent =
-            scan.squareFeet.toLocaleString() +
-            " sq ft";
-    }
 }
 
 
@@ -1814,85 +1451,27 @@ function updateModelScreen(
 
 function deleteCurrentScan() {
 
-    if (
-        currentPropertyId &&
-        currentViewingScan
-    ) {
+    if (!currentScan) {
 
-        const confirmDelete =
-            confirm(
-                "Delete this saved scan?"
-            );
-
-
-        if (!confirmDelete) {
-            return;
-        }
-
-
-        const properties =
-            getProperties();
-
-
-        const property =
-            properties.find(
-                item =>
-                    item.id ===
-                    currentPropertyId
-            );
-
-
-        if (property) {
-
-            property.scans =
-                property.scans.filter(
-                    scan =>
-                        scan.id !==
-                        currentViewingScan.id
-                );
-
-
-            saveProperties(
-                properties
-            );
-
-
-            currentViewingScan =
-                null;
-
-
-            currentScan =
-                null;
-
-
-            renderPropertyDetails();
-
-            displaySavedScans();
-
-            renderAllProperties();
-
-
-            showScreen(
-                "propertyScreen"
-            );
-
-
-            return;
-        }
+        return;
     }
 
 
-    currentScan =
-        null;
+    const confirmed =
+        confirm(
+            "Are you sure you want to delete this scan?"
+        );
 
-    currentViewingScan =
-        null;
+
+    if (!confirmed) {
+
+        return;
+    }
 
 
-    showScreen(
-        currentPropertyId
-            ? "propertyScreen"
-            : "dashboardScreen"
+    deleteScan(
+        currentPropertyId,
+        currentScan.id
     );
 }
 
@@ -1902,6 +1481,7 @@ function deleteCurrentScan() {
    ========================================================= */
 
 function deleteScan(
+    propertyId,
     scanId
 ) {
 
@@ -1909,45 +1489,51 @@ function deleteScan(
         getProperties();
 
 
-    let changed = false;
+    const property =
+        properties.find(
+            p =>
+                p.id ===
+                propertyId
+        );
 
 
-    properties.forEach(
-        property => {
+    if (!property) {
 
-            const originalLength =
-                property.scans.length;
-
-
-            property.scans =
-                property.scans.filter(
-                    scan =>
-                        scan.id !==
-                        scanId
-                );
+        return;
+    }
 
 
-            if (
-                property.scans.length !==
-                originalLength
-            ) {
+    property.scans =
+        (property.scans || [])
+            .filter(
+                scan =>
+                    scan.id !==
+                    scanId
+            );
 
-                changed = true;
-            }
-        }
+
+    saveProperties(
+        properties
     );
 
 
-    if (changed) {
+    currentScan = null;
+    currentViewingScan = null;
 
-        saveProperties(
-            properties
-        );
 
-        displaySavedScans();
+    renderAllProperties();
 
-        renderAllProperties();
-    }
+    displaySavedScans();
+
+
+    alert(
+        "Scan deleted."
+    );
+
+
+    showScreen(
+        "dashboardScreen"
+    );
 }
 
 
@@ -1967,14 +1553,11 @@ function cancelScan() {
     }
 
 
-    currentScan =
-        null;
+    currentScan = null;
 
 
     showScreen(
-        currentPropertyId
-            ? "propertyScreen"
-            : "dashboardScreen"
+        "dashboardScreen"
     );
 }
 
@@ -1986,193 +1569,17 @@ function cancelScan() {
 function showScanHelp() {
 
     alert(
-        "Move slowly through the property while the scanner captures the space. " +
-        "The current GitHub prototype simulates the scanning process. " +
-        "Native LiDAR scanning will be connected in a future version."
+        "Move slowly around the property while scanning. " +
+        "Keep the device pointed toward walls, floors, ceilings, " +
+        "and objects so DOLLHOUSE can build the property model.\n\n" +
+        "This web prototype uses a simulated scanner. " +
+        "Real Apple LiDAR/RoomPlan scanning will be added in the native iPad version."
     );
 }
 
 
 /* =========================================================
-   PREMIUM
-   ========================================================= */
-
-function selectSubscription(
-    plan
-) {
-
-    selectedSubscription =
-        plan;
-
-
-    document
-        .querySelectorAll(
-            ".subscription-card"
-        )
-        .forEach(
-            card => {
-
-                card.classList.remove(
-                    "selected"
-                );
-            }
-        );
-
-
-    const selectedCard =
-        document.querySelector(
-            `[data-plan="${plan}"]`
-        );
-
-
-    if (selectedCard) {
-
-        selectedCard.classList.add(
-            "selected"
-        );
-    }
-
-
-    const subscribeButton =
-        document.getElementById(
-            "subscribeButton"
-        );
-
-
-    if (subscribeButton) {
-
-        const names = {
-
-            weekly:
-                "WEEKLY — $4.99",
-
-            monthly:
-                "MONTHLY — $14.99",
-
-            yearly:
-                "YEARLY — $249.99"
-        };
-
-
-        subscribeButton.textContent =
-            "CONTINUE WITH " +
-            names[plan];
-    }
-}
-
-
-function activatePremium() {
-
-    if (!selectedSubscription) {
-
-        alert(
-            "Please select a subscription plan first."
-        );
-
-        return;
-    }
-
-
-    /*
-       Prototype-only activation.
-       No real payment is processed.
-    */
-
-    localStorage.setItem(
-        "dollhousePremium",
-        "true"
-    );
-
-
-    localStorage.setItem(
-        "dollhousePlan",
-        selectedSubscription
-    );
-
-
-    updateProfile();
-
-    updateDashboard();
-
-
-    alert(
-        "Premium activated for this prototype."
-    );
-
-
-    showScreen(
-        "dashboardScreen"
-    );
-}
-
-
-function isPremium() {
-
-    return (
-        localStorage.getItem(
-            "dollhousePremium"
-        ) === "true"
-    );
-}
-
-
-/* =========================================================
-   PROFILE
-   ========================================================= */
-
-function updateProfile() {
-
-    const email =
-        localStorage.getItem(
-            "dollhouseEmail"
-        );
-
-
-    const profileEmail =
-        document.getElementById(
-            "profileEmail"
-        );
-
-
-    const profilePlan =
-        document.getElementById(
-            "profilePlan"
-        );
-
-
-    if (profileEmail) {
-
-        profileEmail.textContent =
-            email ||
-            "Not signed in";
-    }
-
-
-    if (profilePlan) {
-
-        if (isPremium()) {
-
-            const plan =
-                localStorage.getItem(
-                    "dollhousePlan"
-                );
-
-
-            profilePlan.textContent =
-                "DOLLHOUSE Premium — " +
-                (plan || "Active");
-
-        } else {
-
-            profilePlan.textContent =
-                "Free Plan";
-        }
-    }
-}
-
-
-/* =========================================================
-   PROPERTY SEARCH
+   SEARCH PROPERTIES
    ========================================================= */
 
 function filterProperties() {
@@ -2189,15 +1596,13 @@ function filterProperties() {
         );
 
 
-    if (
-        !searchInput ||
-        !container
-    ) {
+    if (!searchInput || !container) {
+
         return;
     }
 
 
-    const searchTerm =
+    const search =
         searchInput.value
             .trim()
             .toLowerCase();
@@ -2212,26 +1617,16 @@ function filterProperties() {
             property =>
                 property.name
                     .toLowerCase()
-                    .includes(
-                        searchTerm
-                    )
+                    .includes(search)
         );
 
 
-    if (
-        filtered.length === 0
-    ) {
+    if (filtered.length === 0) {
 
         container.innerHTML = `
-
-            <div class="empty-state">
-
-                <p>
-                    No properties match your search.
-                </p>
-
-            </div>
-
+            <p class="empty-message">
+                No properties found.
+            </p>
         `;
 
         return;
@@ -2239,90 +1634,78 @@ function filterProperties() {
 
 
     container.innerHTML =
-        filtered.map(
-            property => {
+        filtered
+            .map(
+                property => {
 
-                const latestScan =
-                    property.scans[0];
+                    const scanCount =
+                        property.scans
+                            ? property.scans.length
+                            : 0;
 
 
-                return `
+                    return `
+                        <div
+                            class="property-card"
+                            onclick="openProperty('${property.id}')"
+                        >
 
-                    <div
-                        class="property-card"
-                        onclick="openProperty('${property.id}')"
-                    >
+                            <div>
 
-                        <div class="property-card-icon">
-                            ◈
-                        </div>
+                                <h3>
+                                    ${escapeHTML(property.name)}
+                                </h3>
 
-                        <div class="property-card-info">
+                                <p>
+                                    ${scanCount}
+                                    ${scanCount === 1 ? "scan" : "scans"}
+                                </p>
 
-                            <h3>
-                                ${escapeHTML(
-                                    property.name
-                                )}
-                            </h3>
-
-                            <p>
-                                ${property.scans.length}
-                                scan${
-                                    property.scans.length === 1
-                                        ? ""
-                                        : "s"
-                                }
-                            </p>
+                            </div>
 
                             <span>
-
-                                ${
-                                    latestScan
-                                        ? "Last scanned: " +
-                                          formatDate(
-                                              latestScan.date
-                                          )
-                                        : "No scans"
-                                }
-
+                                →
                             </span>
 
                         </div>
-
-                        <div class="property-card-arrow">
-                            →
-                        </div>
-
-                    </div>
-
-                `;
-            }
-        ).join("");
+                    `;
+                }
+            )
+            .join("");
 }
 
 
 /* =========================================================
-   AI ASSISTANT
+   AI CHAT
    ========================================================= */
+
+function handleChatKey(event) {
+
+    if (
+        event.key === "Enter"
+    ) {
+
+        sendMessage();
+    }
+}
+
 
 function sendMessage() {
 
     const input =
         document.getElementById(
-            "aiInput"
+            "chatInput"
         );
 
 
     const messages =
         document.getElementById(
-            "chatMessages"
+            "aiMessages"
         );
 
 
-    if (
-        !input ||
-        !messages
-    ) {
+    if (!input || !messages) {
+
         return;
     }
 
@@ -2332,10 +1715,12 @@ function sendMessage() {
 
 
     if (!message) {
+
         return;
     }
 
 
+    // User message
     const userMessage =
         document.createElement(
             "div"
@@ -2343,11 +1728,11 @@ function sendMessage() {
 
 
     userMessage.className =
-        "chat-message user-message";
+        "user-message";
 
 
-    userMessage.textContent =
-        message;
+    userMessage.innerHTML =
+        `<p>${escapeHTML(message)}</p>`;
 
 
     messages.appendChild(
@@ -2355,21 +1740,11 @@ function sendMessage() {
     );
 
 
-    input.value =
-        "";
+    input.value = "";
 
 
-    messages.scrollTop =
-        messages.scrollHeight;
-
-
+    // AI response
     setTimeout(() => {
-
-        const response =
-            generateAIResponse(
-                message
-            );
-
 
         const aiMessage =
             document.createElement(
@@ -2378,11 +1753,20 @@ function sendMessage() {
 
 
         aiMessage.className =
-            "chat-message ai-message";
+            "ai-message";
 
 
-        aiMessage.textContent =
-            response;
+        aiMessage.innerHTML = `
+            <strong>
+                DOLLHOUSE AI
+            </strong>
+
+            <p>
+                ${escapeHTML(
+                    generateAIResponse(message)
+                )}
+            </p>
+        `;
 
 
         messages.appendChild(
@@ -2397,19 +1781,9 @@ function sendMessage() {
 }
 
 
-function handleChatKey(
-    event
-) {
-
-    if (
-        event.key ===
-        "Enter"
-    ) {
-
-        sendMessage();
-    }
-}
-
+/* =========================================================
+   AI RESPONSE
+   ========================================================= */
 
 function generateAIResponse(
     message
@@ -2420,102 +1794,62 @@ function generateAIResponse(
 
 
     if (
-        text.includes(
-            "maintenance"
-        ) ||
-        text.includes(
-            "fix"
-        ) ||
-        text.includes(
-            "repair"
-        )
-    ) {
-
-        return (
-            "I can help organize potential " +
-            "maintenance areas by property, " +
-            "room, and scan date. Premium " +
-            "property intelligence can also " +
-            "track changes between scans."
-        );
-    }
-
-
-    if (
-        text.includes(
-            "scan"
-        ) ||
-        text.includes(
-            "lidar"
-        )
-    ) {
-
-        return (
-            "DOLLHOUSE is designed to scan " +
-            "an entire property and turn " +
-            "captured spatial information " +
-            "into an interactive 3D model. " +
-            "The current GitHub version " +
-            "uses a simulated scanner."
-        );
-    }
-
-
-    if (
-        text.includes(
-            "compare"
-        ) ||
-        text.includes(
-            "change"
-        )
+        text.includes("premium") ||
+        text.includes("subscription")
     ) {
 
         return isPremium()
-
-            ? "Open a property to compare its saved scan history and review the AI change summary."
-
-            : "Scan comparison is a Premium feature.";
+            ? "Your account currently has Premium access."
+            : "Your account is currently on the Free plan. You can view Premium plans from the Subscription page.";
     }
 
 
     if (
-        text.includes(
-            "property"
-        ) ||
-        text.includes(
-            "house"
-        )
+        text.includes("scan") ||
+        text.includes("scanning")
     ) {
 
-        return (
-            "Open My Scans to organize " +
-            "properties and view their " +
-            "scan history."
-        );
+        return "DOLLHOUSE scans are designed to organize property information into a visual 3D model. The current web prototype uses a simulated scan.";
     }
 
 
-    return (
-        "I can help with property scans, " +
-        "3D models, maintenance organization, " +
-        "scan history, and DOLLHOUSE features."
-    );
+    if (
+        text.includes("maintenance") ||
+        text.includes("fix") ||
+        text.includes("repair")
+    ) {
+
+        return "Maintenance analysis can help organize areas that may need attention based on your property information.";
+    }
+
+
+    if (
+        text.includes("room") ||
+        text.includes("rooms")
+    ) {
+
+        return "DOLLHOUSE can organize scan information by room and provide room-by-room property analysis.";
+    }
+
+
+    return "I can help you understand your property, scans, maintenance information, historical changes, and DOLLHOUSE features.";
 }
 
 
 /* =========================================================
-   SETTINGS
+   RESET APP DATA
    ========================================================= */
 
 function resetAppData() {
 
     const confirmed =
         confirm(
-            "This will delete your saved DOLLHOUSE prototype data. Continue?"
+            "This will delete your DOLLHOUSE account and saved scans. Continue?"
         );
 
 
     if (!confirmed) {
+
         return;
     }
 
@@ -2529,14 +1863,6 @@ function resetAppData() {
     );
 
     localStorage.removeItem(
-        "dollhousePremium"
-    );
-
-    localStorage.removeItem(
-        "dollhousePlan"
-    );
-
-    localStorage.removeItem(
         "dollhouseSignedIn"
     );
 
@@ -2544,67 +1870,91 @@ function resetAppData() {
         "dollhouseEmail"
     );
 
+    localStorage.removeItem(
+        "dollhousePremium"
+    );
 
-    alert(
-        "DOLLHOUSE data has been reset."
+    localStorage.removeItem(
+        "dollhouseSubscription"
     );
 
 
-    location.reload();
+    currentScan = null;
+    currentPropertyId = null;
+    currentViewingScan = null;
+    selectedSubscription = null;
+
+
+    showScreen(
+        "welcomeScreen"
+    );
 }
 
 
 /* =========================================================
-   UTILITIES
+   DATE FORMAT
    ========================================================= */
 
 function formatDate(
     dateString
 ) {
 
+    if (!dateString) {
+
+        return "Unknown date";
+    }
+
+
     const date =
-        new Date(
-            dateString
-        );
+        new Date(dateString);
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return "Unknown date";
+    }
 
 
     return date.toLocaleDateString(
         undefined,
         {
-            year: "numeric",
-            month: "long",
-            day: "numeric"
+            month: "short",
+            day: "numeric",
+            year: "numeric"
         }
     );
 }
 
 
+/* =========================================================
+   HTML SAFETY
+   ========================================================= */
+
 function escapeHTML(
-    value
+    text
 ) {
 
-    return String(value)
-
+    return String(text)
         .replace(
             /&/g,
             "&amp;"
         )
-
         .replace(
             /</g,
             "&lt;"
         )
-
         .replace(
             />/g,
             "&gt;"
         )
-
         .replace(
             /"/g,
             "&quot;"
         )
-
         .replace(
             /'/g,
             "&#039;"
@@ -2613,7 +1963,7 @@ function escapeHTML(
 
 
 /* =========================================================
-   INITIALIZE APP
+   APP STARTUP
    ========================================================= */
 
 document.addEventListener(
@@ -2626,56 +1976,25 @@ document.addEventListener(
             ) === "true";
 
 
-        updateProfile();
+        // Make sure Premium has a default value
+        if (
+            localStorage.getItem(
+                "dollhousePremium"
+            ) === null
+        ) {
 
-        updateDashboard();
-
-        displaySavedScans();
-
-        renderAllProperties();
-
-
-        /*
-           Make the model screen back button
-           return to the correct previous screen.
-        */
-
-        const modelBackButton =
-            document.querySelector(
-                "#modelScreen .back-button"
-            );
-
-
-        if (modelBackButton) {
-
-            modelBackButton.onclick =
-                () => {
-
-                    showScreen(
-                        lastModelSource
-                    );
-                };
-        }
-
-
-        /*
-           Select monthly by default
-           on the Premium screen.
-        */
-
-        if (!selectedSubscription) {
-
-            selectSubscription(
-                "monthly"
+            localStorage.setItem(
+                "dollhousePremium",
+                "false"
             );
         }
 
-
-        /*
-           Open the correct starting screen.
-        */
 
         if (signedIn) {
+
+            updateProfile();
+
+            displaySavedScans();
 
             showScreen(
                 "dashboardScreen"
