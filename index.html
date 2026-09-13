@@ -70,6 +70,7 @@
 
             <button
                 class="primary-button"
+                type="button"
                 onclick="showScreen('accountScreen')"
             >
                 GET STARTED
@@ -88,12 +89,14 @@
 
         <div class="form-container">
 
-            <div
+            <button
                 class="back-button"
+                type="button"
                 onclick="showScreen('welcomeScreen')"
+                aria-label="Go back"
             >
                 ←
-            </div>
+            </button>
 
             <h1>Create Account</h1>
 
@@ -101,19 +104,26 @@
                 Create your DOLLHOUSE account to save your properties.
             </p>
 
-            <label>Email</label>
+            <label for="emailInput">Email</label>
+
+            <!-- IMPORTANT:
+                 type="text" prevents browser email validation
+                 from blocking the prototype. JavaScript validates it.
+            -->
 
             <input
                 id="emailInput"
-                type="email"
+                type="text"
+                autocomplete="email"
                 placeholder="you@example.com"
             >
 
-            <label>Password</label>
+            <label for="passwordInput">Password</label>
 
             <input
                 id="passwordInput"
                 type="password"
+                autocomplete="new-password"
                 placeholder="Minimum 8 characters"
             >
 
@@ -130,13 +140,14 @@
 
                 <label for="termsCheckbox">
                     I agree to the DOLLHOUSE
-                    Terms & Conditions.
+                    Terms &amp; Conditions.
                 </label>
 
             </div>
 
             <button
                 class="primary-button"
+                type="button"
                 onclick="createAccount()"
             >
                 CREATE ACCOUNT
@@ -159,6 +170,7 @@
 
                 <button
                     class="menu-button"
+                    type="button"
                     onclick="toggleMenu()"
                     aria-label="Open menu"
                 >
@@ -174,6 +186,7 @@
 
             <button
                 class="premium-button"
+                type="button"
                 onclick="showScreen('premiumScreen')"
             >
                 ✦ PREMIUM
@@ -197,6 +210,7 @@
 
                 <button
                     class="menu-close"
+                    type="button"
                     onclick="toggleMenu()"
                 >
                     ✕
@@ -204,9 +218,9 @@
 
             </div>
 
-
             <button
                 class="menu-item"
+                type="button"
                 onclick="navigateFromMenu('dashboardScreen')"
             >
                 <span>⌂</span>
@@ -215,6 +229,7 @@
 
             <button
                 class="menu-item"
+                type="button"
                 onclick="navigateFromMenu('scansScreen')"
             >
                 <span>◇</span>
@@ -223,6 +238,7 @@
 
             <button
                 class="menu-item"
+                type="button"
                 onclick="navigateFromMenu('profileScreen')"
             >
                 <span>◯</span>
@@ -231,6 +247,7 @@
 
             <button
                 class="menu-item"
+                type="button"
                 onclick="navigateFromMenu('premiumScreen')"
             >
                 <span>✦</span>
@@ -239,6 +256,7 @@
 
             <button
                 class="menu-item"
+                type="button"
                 onclick="navigateFromMenu('aiScreen')"
             >
                 <span>✧</span>
@@ -247,6 +265,7 @@
 
             <button
                 class="menu-item"
+                type="button"
                 onclick="navigateFromMenu('settingsScreen')"
             >
                 <span>⚙</span>
@@ -257,6 +276,7 @@
 
             <button
                 class="menu-item logout-item"
+                type="button"
                 onclick="logout()"
             >
                 <span>↪</span>
@@ -272,6 +292,7 @@
 
             <button
                 class="new-scan-card"
+                type="button"
                 onclick="startScan()"
             >
 
@@ -316,6 +337,7 @@
                 </div>
 
                 <button
+                    type="button"
                     onclick="showScreen('premiumScreen')"
                 >
                     UPGRADE
@@ -332,6 +354,7 @@
 
                 <button
                     class="text-button"
+                    type="button"
                     onclick="showScreen('scansScreen')"
                 >
                     VIEW ALL
@@ -364,7 +387,9 @@
 
         <button
             class="ai-button"
+            type="button"
             onclick="showScreen('aiScreen')"
+            aria-label="Open AI Property Assistant"
         >
             ✦
         </button>
@@ -382,6 +407,7 @@
 
             <button
                 class="back-button"
+                type="button"
                 onclick="showScreen('dashboardScreen')"
             >
                 ←
@@ -443,6 +469,7 @@
 
             <button
                 class="back-button"
+                type="button"
                 onclick="showScreen('scansScreen')"
             >
                 ←
@@ -462,6 +489,7 @@
 
             <button
                 class="icon-button"
+                type="button"
                 onclick="startScan()"
             >
                 ＋
@@ -508,9 +536,6 @@
             </div>
 
             <div id="propertyScanHistory">
-
-                <!-- JavaScript fills this -->
-
             </div>
 
 
@@ -575,6 +600,7 @@
 
                 <button
                     class="premium-lock-button"
+                    type="button"
                     onclick="showScreen('premiumScreen')"
                 >
                     🔒 UNLOCK PREMIUM ANALYSIS
@@ -597,6 +623,7 @@
 
             <button
                 class="back-button"
+                type="button"
                 onclick="showScreen('dashboardScreen')"
             >
                 ←
@@ -634,7 +661,10 @@
 
             <div class="profile-options">
 
-                <button class="profile-option">
+                <button
+                    class="profile-option"
+                    type="button"
+                >
                     <span>✉</span>
                     Account Email
                     <span>→</span>
@@ -642,6 +672,7 @@
 
                 <button
                     class="profile-option"
+                    type="button"
                     onclick="showScreen('premiumScreen')"
                 >
                     <span>✦</span>
@@ -651,6 +682,7 @@
 
                 <button
                     class="profile-option"
+                    type="button"
                     onclick="showScreen('settingsScreen')"
                 >
                     <span>⚙</span>
@@ -675,6 +707,7 @@
 
             <button
                 class="back-button"
+                type="button"
                 onclick="showScreen('dashboardScreen')"
             >
                 ←
@@ -774,6 +807,7 @@
 
                 <button
                     class="glass-button"
+                    type="button"
                     onclick="cancelScan()"
                 >
                     ✕
@@ -785,6 +819,7 @@
 
                 <button
                     class="glass-button"
+                    type="button"
                     onclick="showScanHelp()"
                 >
                     ?
@@ -799,7 +834,7 @@
 
                     <div
                         class="scan-percentage"
-                        id="scanPercentage"
+                        id="scanPercent"
                     >
                         0%
                     </div>
@@ -830,12 +865,14 @@
 
                 <div class="scan-info">
 
-                    <span id="roomCount">
-                        ROOMS: 0
+                    <span>
+                        ROOMS:
+                        <strong id="roomCount">0</strong>
                     </span>
 
-                    <span id="objectCount">
-                        OBJECTS: 0
+                    <span>
+                        OBJECTS:
+                        <strong id="objectCount">0</strong>
                     </span>
 
                 </div>
@@ -857,14 +894,19 @@
 
             <button
                 class="back-button"
+                type="button"
                 onclick="showScreen('dashboardScreen')"
             >
                 ←
             </button>
 
-            <h1>DOLLHOUSE</h1>
+            <div>
+                <h1>DOLLHOUSE</h1>
+                <p id="modelDate"></p>
+            </div>
 
             <button
+                type="button"
                 onclick="deleteCurrentScan()"
                 aria-label="Delete scan"
             >
@@ -903,13 +945,15 @@
 
         <div class="model-information">
 
-            <h2>Scan Complete</h2>
+            <h2 id="modelTitle">
+                Scan Complete
+            </h2>
 
             <div class="stats-grid">
 
                 <div class="stat">
 
-                    <strong id="finalRooms">
+                    <strong id="modelRooms">
                         1
                     </strong>
 
@@ -919,7 +963,7 @@
 
                 <div class="stat">
 
-                    <strong id="finalObjects">
+                    <strong id="modelObjects">
                         0
                     </strong>
 
@@ -929,11 +973,11 @@
 
                 <div class="stat">
 
-                    <strong>
+                    <strong id="modelSize">
                         3D
                     </strong>
 
-                    <span>Model</span>
+                    <span>Size</span>
 
                 </div>
 
@@ -942,6 +986,7 @@
 
             <button
                 class="primary-button"
+                type="button"
                 onclick="saveScan()"
             >
                 SAVE SCAN
@@ -962,6 +1007,7 @@
 
             <button
                 class="back-button"
+                type="button"
                 onclick="showScreen('dashboardScreen')"
             >
                 ←
@@ -1000,13 +1046,16 @@
         <div class="chat-input-container">
 
             <input
-                id="chatInput"
+                id="aiInput"
                 type="text"
                 placeholder="Ask DOLLHOUSE AI..."
                 onkeydown="handleChatKey(event)"
             >
 
-            <button onclick="sendMessage()">
+            <button
+                type="button"
+                onclick="sendMessage()"
+            >
                 ↑
             </button>
 
@@ -1025,6 +1074,7 @@
 
             <button
                 class="back-button"
+                type="button"
                 onclick="showScreen('dashboardScreen')"
             >
                 ←
@@ -1115,6 +1165,8 @@
 
                 <button
                     class="subscription-card"
+                    type="button"
+                    data-plan="weekly"
                     onclick="selectSubscription('weekly')"
                 >
 
@@ -1145,6 +1197,8 @@
 
                 <button
                     class="subscription-card"
+                    type="button"
+                    data-plan="monthly"
                     onclick="selectSubscription('monthly')"
                 >
 
@@ -1175,6 +1229,8 @@
 
                 <button
                     class="subscription-card yearly-plan"
+                    type="button"
+                    data-plan="yearly"
                     onclick="selectSubscription('yearly')"
                 >
 
@@ -1210,6 +1266,7 @@
             <button
                 id="subscribeButton"
                 class="primary-button"
+                type="button"
                 onclick="activatePremium()"
             >
                 CHOOSE A PLAN
