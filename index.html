@@ -2,7 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    >
+
     <meta name="theme-color" content="#050509">
 
     <title>DOLLHOUSE</title>
@@ -14,59 +18,86 @@
 
 <div id="app">
 
-    <!-- ========================================= -->
-    <!-- WELCOME -->
-    <!-- ========================================= -->
+    <!-- ================================================= -->
+    <!-- WELCOME SCREEN -->
+    <!-- ================================================= -->
 
     <section id="welcomeScreen" class="screen active">
 
-        <div class="welcome-content">
+        <div class="welcome-container">
 
-            <div class="logo-container">
+            <div class="logo-area">
+
                 <div class="logo-glow"></div>
-                <h1 class="logo">DOLLHOUSE</h1>
+
+                <h1 class="main-logo">
+                    DOLLHOUSE
+                </h1>
+
             </div>
 
             <p class="tagline">
                 Scan. Understand. Visualize.
             </p>
 
-            <div class="feature-list">
 
-                <div class="feature">
-                    <div class="feature-icon">⌁</div>
+            <div class="welcome-features">
+
+                <div class="feature-card">
+
+                    <div class="feature-icon">
+                        ◈
+                    </div>
+
                     <div>
-                        <h3>LiDAR Scanning</h3>
+                        <h3>Property Scanning</h3>
+
                         <p>
-                            Capture your property using compatible
-                            iPad scanning technology.
+                            Capture and understand your
+                            entire property.
                         </p>
                     </div>
+
                 </div>
 
-                <div class="feature">
-                    <div class="feature-icon">◇</div>
+
+                <div class="feature-card">
+
+                    <div class="feature-icon">
+                        ◇
+                    </div>
+
                     <div>
                         <h3>3D DOLLHOUSE</h3>
+
                         <p>
-                            Transform your property into an
+                            Turn your property into an
                             interactive 3D model.
                         </p>
                     </div>
+
                 </div>
 
-                <div class="feature">
-                    <div class="feature-icon">✦</div>
+
+                <div class="feature-card">
+
+                    <div class="feature-icon">
+                        ✦
+                    </div>
+
                     <div>
-                        <h3>AI Property Assistant</h3>
+                        <h3>AI Property Intelligence</h3>
+
                         <p>
-                            Understand your property's changes,
-                            maintenance, and important information.
+                            Discover changes, maintenance
+                            needs, and property insights.
                         </p>
                     </div>
+
                 </div>
 
             </div>
+
 
             <button
                 class="primary-button"
@@ -80,60 +111,96 @@
     </section>
 
 
-    <!-- ========================================= -->
-    <!-- ACCOUNT -->
-    <!-- ========================================= -->
+    <!-- ================================================= -->
+    <!-- CREATE ACCOUNT -->
+    <!-- ================================================= -->
 
     <section id="accountScreen" class="screen">
 
-        <div class="form-container">
+        <div class="account-container">
 
-            <div
+            <button
                 class="back-button"
                 onclick="showScreen('welcomeScreen')"
             >
                 ←
+            </button>
+
+
+            <div class="account-logo">
+                DOLLHOUSE
             </div>
 
-            <h1>Create Account</h1>
 
-            <p class="subtitle">
-                Create your DOLLHOUSE account to save your properties.
+            <h1>
+                Create Account
+            </h1>
+
+            <p class="screen-subtitle">
+                Create your account to begin managing
+                your properties.
             </p>
 
-            <label>Email</label>
 
-            <input
-                id="emailInput"
-                type="email"
-                placeholder="you@example.com"
-            >
+            <div class="form-group">
 
-            <label>Password</label>
-
-            <input
-                id="passwordInput"
-                type="password"
-                placeholder="Minimum 8 characters"
-            >
-
-            <p class="password-note">
-                Password must contain at least 8 characters.
-            </p>
-
-            <div class="terms-box">
+                <label for="emailInput">
+                    Email
+                </label>
 
                 <input
-                    type="checkbox"
+                    id="emailInput"
+                    type="text"
+                    inputmode="email"
+                    autocomplete="email"
+                    placeholder="you@example.com"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="passwordInput">
+                    Password
+                </label>
+
+                <input
+                    id="passwordInput"
+                    type="password"
+                    autocomplete="new-password"
+                    placeholder="Minimum 8 characters"
+                >
+
+                <p class="input-note">
+                    Password must contain at least 8 characters.
+                </p>
+
+            </div>
+
+
+            <div class="terms-container">
+
+                <input
                     id="termsCheckbox"
+                    type="checkbox"
                 >
 
                 <label for="termsCheckbox">
-                    I agree to the DOLLHOUSE
-                    Terms & Conditions.
+
+                    I agree to the
+                    <button
+                        type="button"
+                        class="inline-link"
+                        onclick="showTerms()"
+                    >
+                        DOLLHOUSE Terms & Conditions
+                    </button>
+
                 </label>
 
             </div>
+
 
             <button
                 class="primary-button"
@@ -142,20 +209,110 @@
                 CREATE ACCOUNT
             </button>
 
+
+            <p class="account-note">
+                Your account information is saved securely
+                for this prototype on this device.
+            </p>
+
         </div>
 
     </section>
 
 
-    <!-- ========================================= -->
+    <!-- ================================================= -->
+    <!-- TERMS -->
+    <!-- ================================================= -->
+
+    <section id="termsScreen" class="screen">
+
+        <div class="page-container">
+
+            <div class="page-header">
+
+                <button
+                    class="back-button"
+                    onclick="showScreen('accountScreen')"
+                >
+                    ←
+                </button>
+
+                <div>
+                    <h1>Terms & Conditions</h1>
+
+                    <p>
+                        DOLLHOUSE prototype
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="content-card">
+
+                <h2>
+                    DOLLHOUSE Prototype Terms
+                </h2>
+
+                <p>
+                    DOLLHOUSE is currently a prototype.
+                    Features shown in this version may
+                    change before the official release.
+                </p>
+
+                <h3>
+                    Property Data
+                </h3>
+
+                <p>
+                    Property information and scans in this
+                    prototype are stored locally on the device.
+                </p>
+
+                <h3>
+                    Scanning
+                </h3>
+
+                <p>
+                    The current prototype uses a simulated
+                    scanning experience. Real LiDAR scanning
+                    will be connected in the native iPad
+                    application.
+                </p>
+
+                <h3>
+                    AI Features
+                </h3>
+
+                <p>
+                    AI property features are demonstrations
+                    and should not be treated as professional
+                    inspection or engineering advice.
+                </p>
+
+                <button
+                    class="primary-button"
+                    onclick="showScreen('accountScreen')"
+                >
+                    BACK TO ACCOUNT
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================================================= -->
     <!-- DASHBOARD -->
-    <!-- ========================================= -->
+    <!-- ================================================= -->
 
     <section id="dashboardScreen" class="screen">
 
         <header class="top-bar">
 
-            <div class="top-left">
+            <div class="top-bar-left">
 
                 <button
                     class="menu-button"
@@ -165,12 +322,21 @@
                     ☰
                 </button>
 
-                <div>
-                    <h1>DOLLHOUSE</h1>
-                    <p>Property Workspace</p>
+
+                <div class="brand-small">
+
+                    <h1>
+                        DOLLHOUSE
+                    </h1>
+
+                    <p>
+                        Property Workspace
+                    </p>
+
                 </div>
 
             </div>
+
 
             <button
                 class="premium-button"
@@ -182,16 +348,16 @@
         </header>
 
 
-        <!-- MAIN MENU -->
+        <!-- SIDE MENU -->
 
-        <div
+        <aside
             id="mainMenu"
             class="side-menu"
         >
 
-            <div class="menu-header">
+            <div class="menu-top">
 
-                <div class="menu-logo">
+                <div class="menu-brand">
                     DOLLHOUSE
                 </div>
 
@@ -199,19 +365,20 @@
                     class="menu-close"
                     onclick="toggleMenu()"
                 >
-                    ✕
+                    ×
                 </button>
 
             </div>
 
 
             <button
-                class="menu-item"
+                class="menu-item active-menu-item"
                 onclick="navigateFromMenu('dashboardScreen')"
             >
                 <span>⌂</span>
                 Dashboard
             </button>
+
 
             <button
                 class="menu-item"
@@ -221,13 +388,15 @@
                 My Scans
             </button>
 
+
             <button
                 class="menu-item"
                 onclick="navigateFromMenu('profileScreen')"
             >
-                <span>◯</span>
+                <span>○</span>
                 Profile
             </button>
+
 
             <button
                 class="menu-item"
@@ -237,6 +406,7 @@
                 Subscription
             </button>
 
+
             <button
                 class="menu-item"
                 onclick="navigateFromMenu('aiScreen')"
@@ -244,6 +414,7 @@
                 <span>✧</span>
                 AI Property Assistant
             </button>
+
 
             <button
                 class="menu-item"
@@ -253,7 +424,9 @@
                 Settings
             </button>
 
+
             <div class="menu-divider"></div>
+
 
             <button
                 class="menu-item logout-item"
@@ -263,10 +436,13 @@
                 Log Out
             </button>
 
-        </div>
+        </aside>
 
+
+        <!-- DASHBOARD CONTENT -->
 
         <main class="dashboard-content">
+
 
             <!-- NEW SCAN -->
 
@@ -275,27 +451,37 @@
                 onclick="startScan()"
             >
 
-                <div class="scan-icon">
+                <div class="new-scan-icon">
                     ⌁
                 </div>
 
-                <div>
-                    <h2>New Property Scan</h2>
+
+                <div class="new-scan-text">
+
+                    <span class="card-label">
+                        NEW
+                    </span>
+
+                    <h2>
+                        Property Scan
+                    </h2>
 
                     <p>
-                        Scan a room or property using
-                        compatible LiDAR technology.
+                        Scan and visualize your property
+                        in 3D.
                     </p>
+
                 </div>
 
-                <span class="arrow">
+
+                <span class="card-arrow">
                     →
                 </span>
 
             </button>
 
 
-            <!-- FREE PLAN -->
+            <!-- PLAN -->
 
             <div class="plan-card">
 
@@ -310,12 +496,14 @@
                     </h3>
 
                     <p>
-                        Limited scanning capacity
+                        Limited property scanning
                     </p>
 
                 </div>
 
+
                 <button
+                    class="secondary-button"
                     onclick="showScreen('premiumScreen')"
                 >
                     UPGRADE
@@ -324,11 +512,13 @@
             </div>
 
 
-            <!-- RECENT PROPERTIES -->
+            <!-- PROPERTIES -->
 
-            <div class="section-header">
+            <div class="section-title-row">
 
-                <h2>My Properties</h2>
+                <h2>
+                    My Properties
+                </h2>
 
                 <button
                     class="text-button"
@@ -344,9 +534,13 @@
 
                 <div class="empty-state">
 
-                    <div class="empty-icon">
+                    <div class="empty-state-icon">
                         ◇
                     </div>
+
+                    <h3>
+                        No Properties Yet
+                    </h3>
 
                     <p>
                         Your completed properties
@@ -360,11 +554,12 @@
         </main>
 
 
-        <!-- AI BUTTON -->
+        <!-- FLOATING AI BUTTON -->
 
         <button
-            class="ai-button"
+            class="ai-floating-button"
             onclick="showScreen('aiScreen')"
+            aria-label="Open AI Property Assistant"
         >
             ✦
         </button>
@@ -372,380 +567,501 @@
     </section>
 
 
-    <!-- ========================================= -->
+    <!-- ================================================= -->
     <!-- MY SCANS -->
-    <!-- ========================================= -->
+    <!-- ================================================= -->
 
     <section id="scansScreen" class="screen">
 
-        <div class="page-header">
+        <div class="page-container">
 
-            <button
-                class="back-button"
-                onclick="showScreen('dashboardScreen')"
-            >
-                ←
-            </button>
+            <div class="page-header">
 
-            <div>
-                <h1>My Scans</h1>
-                <p>Your property history</p>
-            </div>
-
-        </div>
-
-
-        <main class="page-content">
-
-            <div class="property-search">
-
-                <input
-                    id="propertySearch"
-                    type="search"
-                    placeholder="Search properties..."
-                    oninput="filterProperties()"
+                <button
+                    class="back-button"
+                    onclick="showScreen('dashboardScreen')"
                 >
+                    ←
+                </button>
 
-            </div>
+                <div>
 
-
-            <div id="allProperties">
-
-                <div class="empty-state">
-
-                    <div class="empty-icon">
-                        ◇
-                    </div>
-
-                    <h3>No properties yet</h3>
+                    <h1>
+                        My Scans
+                    </h1>
 
                     <p>
-                        Complete your first scan to create
-                        your property history.
+                        Your property history
                     </p>
 
                 </div>
 
             </div>
 
-        </main>
+
+            <main class="page-content">
+
+                <div class="search-box">
+
+                    <span>
+                        ⌕
+                    </span>
+
+                    <input
+                        id="propertySearch"
+                        type="search"
+                        placeholder="Search properties..."
+                        oninput="filterProperties()"
+                    >
+
+                </div>
+
+
+                <div id="allProperties">
+
+                    <div class="empty-state">
+
+                        <div class="empty-state-icon">
+                            ◇
+                        </div>
+
+                        <h3>
+                            No Properties Yet
+                        </h3>
+
+                        <p>
+                            Complete your first scan to
+                            create your property history.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </main>
+
+        </div>
 
     </section>
 
 
-    <!-- ========================================= -->
+    <!-- ================================================= -->
     <!-- PROPERTY DETAILS -->
-    <!-- ========================================= -->
+    <!-- ================================================= -->
 
     <section id="propertyScreen" class="screen">
 
-        <div class="page-header">
+        <div class="page-container">
 
-            <button
-                class="back-button"
-                onclick="showScreen('scansScreen')"
-            >
-                ←
-            </button>
+            <div class="page-header">
 
-            <div>
-
-                <h1 id="propertyTitle">
-                    Property
-                </h1>
-
-                <p id="propertySubtitle">
-                    Property history
-                </p>
-
-            </div>
-
-            <button
-                class="icon-button"
-                onclick="startScan()"
-            >
-                ＋
-            </button>
-
-        </div>
+                <button
+                    class="back-button"
+                    onclick="showScreen('scansScreen')"
+                >
+                    ←
+                </button>
 
 
-        <main class="page-content">
+                <div class="property-header-info">
 
-            <!-- PROPERTY SUMMARY -->
-
-            <div class="property-overview">
-
-                <div class="property-overview-icon">
-                    🏠
-                </div>
-
-                <div>
-
-                    <h2 id="propertyNameDisplay">
+                    <h1 id="propertyTitle">
                         Property
-                    </h2>
+                    </h1>
 
-                    <p id="propertyStats">
-                        No scan information
+                    <p id="propertySubtitle">
+                        Property history
                     </p>
 
                 </div>
 
-            </div>
 
-
-            <!-- SCAN HISTORY -->
-
-            <div class="section-header">
-
-                <h2>Scan History</h2>
-
-                <span class="premium-tag">
-                    PREMIUM
-                </span>
-
-            </div>
-
-            <div id="propertyScanHistory">
-
-                <!-- JavaScript fills this -->
+                <button
+                    class="icon-button"
+                    onclick="startScan()"
+                    aria-label="New scan"
+                >
+                    ＋
+                </button>
 
             </div>
 
 
-            <!-- AI CHANGE REPORT -->
+            <main class="page-content">
 
-            <div class="premium-section">
 
-                <div class="premium-section-header">
+                <!-- PROPERTY OVERVIEW -->
+
+                <div class="property-overview">
+
+                    <div class="property-icon">
+                        🏠
+                    </div>
 
                     <div>
 
-                        <span class="premium-tag">
-                            PREMIUM
-                        </span>
+                        <h2 id="propertyNameDisplay">
+                            Property
+                        </h2>
 
-                        <h2>AI Property Analysis</h2>
+                        <p id="propertyStats">
+                            No scan information
+                        </p>
 
                     </div>
 
-                    <span class="ai-symbol">
-                        ✦
+                </div>
+
+
+                <!-- HISTORY -->
+
+                <div class="section-title-row">
+
+                    <h2>
+                        Scan History
+                    </h2>
+
+                    <span class="premium-tag">
+                        PREMIUM
                     </span>
 
                 </div>
 
 
-                <div class="analysis-card">
+                <div id="propertyScanHistory"></div>
 
-                    <h3>What Changed</h3>
 
-                    <p id="changeSummary">
-                        AI comparison becomes available when
-                        multiple scans of this property exist.
-                    </p>
+                <!-- AI ANALYSIS -->
+
+                <div class="premium-analysis">
+
+                    <div class="analysis-header">
+
+                        <div>
+
+                            <span class="premium-tag">
+                                PREMIUM
+                            </span>
+
+                            <h2>
+                                AI Property Analysis
+                            </h2>
+
+                        </div>
+
+                        <span class="analysis-icon">
+                            ✦
+                        </span>
+
+                    </div>
+
+
+                    <div class="analysis-card">
+
+                        <span class="analysis-label">
+                            WHAT CHANGED
+                        </span>
+
+                        <p id="changeSummary">
+                            AI comparison becomes available
+                            when multiple scans of this
+                            property exist.
+                        </p>
+
+                    </div>
+
+
+                    <div class="analysis-card">
+
+                        <span class="analysis-label">
+                            NEEDS ATTENTION
+                        </span>
+
+                        <p id="maintenanceSummary">
+                            DOLLHOUSE AI can identify areas
+                            that may need further inspection.
+                        </p>
+
+                    </div>
+
+
+                    <div class="analysis-card">
+
+                        <span class="analysis-label">
+                            PROPERTY SUMMARY
+                        </span>
+
+                        <p id="propertyAISummary">
+                            Your AI-generated property
+                            summary will appear here.
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        class="premium-lock-button"
+                        onclick="showScreen('premiumScreen')"
+                    >
+                        🔒 UNLOCK PREMIUM ANALYSIS
+                    </button>
 
                 </div>
 
+            </main>
 
-                <div class="analysis-card">
-
-                    <h3>Needs Attention</h3>
-
-                    <p id="maintenanceSummary">
-                        DOLLHOUSE AI can identify areas that
-                        may need further inspection.
-                    </p>
-
-                </div>
-
-
-                <div class="analysis-card">
-
-                    <h3>Property Summary</h3>
-
-                    <p id="propertyAISummary">
-                        Your AI-generated property summary
-                        will appear here.
-                    </p>
-
-                </div>
-
-
-                <button
-                    class="premium-lock-button"
-                    onclick="showScreen('premiumScreen')"
-                >
-                    🔒 UNLOCK PREMIUM ANALYSIS
-                </button>
-
-            </div>
-
-        </main>
+        </div>
 
     </section>
 
 
-    <!-- ========================================= -->
+    <!-- ================================================= -->
     <!-- PROFILE -->
-    <!-- ========================================= -->
+    <!-- ================================================= -->
 
     <section id="profileScreen" class="screen">
 
-        <div class="page-header">
+        <div class="page-container">
 
-            <button
-                class="back-button"
-                onclick="showScreen('dashboardScreen')"
-            >
-                ←
-            </button>
+            <div class="page-header">
 
-            <div>
-                <h1>Profile</h1>
-                <p>Your DOLLHOUSE account</p>
-            </div>
+                <button
+                    class="back-button"
+                    onclick="showScreen('dashboardScreen')"
+                >
+                    ←
+                </button>
 
-        </div>
+                <div>
 
+                    <h1>
+                        Profile
+                    </h1>
 
-        <main class="page-content">
+                    <p>
+                        Your DOLLHOUSE account
+                    </p>
 
-            <div class="profile-card">
-
-                <div class="profile-avatar">
-                    ◯
                 </div>
 
-                <h2 id="profileEmail">
-                    Account
-                </h2>
-
-                <span
-                    id="profilePlan"
-                    class="profile-plan"
-                >
-                    FREE PLAN
-                </span>
-
             </div>
 
 
-            <div class="profile-options">
+            <main class="page-content">
 
-                <button class="profile-option">
-                    <span>✉</span>
-                    Account Email
-                    <span>→</span>
-                </button>
+                <div class="profile-card">
 
-                <button
-                    class="profile-option"
-                    onclick="showScreen('premiumScreen')"
-                >
-                    <span>✦</span>
-                    Subscription
-                    <span>→</span>
-                </button>
+                    <div class="profile-avatar">
+                        ○
+                    </div>
 
-                <button
-                    class="profile-option"
-                    onclick="showScreen('settingsScreen')"
-                >
-                    <span>⚙</span>
-                    Settings
-                    <span>→</span>
-                </button>
+                    <h2 id="profileEmail">
+                        Account
+                    </h2>
 
-            </div>
+                    <span
+                        id="profilePlan"
+                        class="profile-plan"
+                    >
+                        FREE PLAN
+                    </span>
 
-        </main>
+                </div>
+
+
+                <div class="profile-options">
+
+                    <button class="profile-option">
+
+                        <span>✉</span>
+
+                        <span>
+                            Account Email
+                        </span>
+
+                        <span>→</span>
+
+                    </button>
+
+
+                    <button
+                        class="profile-option"
+                        onclick="showScreen('premiumScreen')"
+                    >
+
+                        <span>✦</span>
+
+                        <span>
+                            Subscription
+                        </span>
+
+                        <span>→</span>
+
+                    </button>
+
+
+                    <button
+                        class="profile-option"
+                        onclick="showScreen('settingsScreen')"
+                    >
+
+                        <span>⚙</span>
+
+                        <span>
+                            Settings
+                        </span>
+
+                        <span>→</span>
+
+                    </button>
+
+                </div>
+
+            </main>
+
+        </div>
 
     </section>
 
 
-    <!-- ========================================= -->
+    <!-- ================================================= -->
     <!-- SETTINGS -->
-    <!-- ========================================= -->
+    <!-- ================================================= -->
 
     <section id="settingsScreen" class="screen">
 
-        <div class="page-header">
+        <div class="page-container">
 
-            <button
-                class="back-button"
-                onclick="showScreen('dashboardScreen')"
-            >
-                ←
-            </button>
+            <div class="page-header">
 
-            <div>
-                <h1>Settings</h1>
-                <p>DOLLHOUSE preferences</p>
+                <button
+                    class="back-button"
+                    onclick="showScreen('dashboardScreen')"
+                >
+                    ←
+                </button>
+
+                <div>
+
+                    <h1>
+                        Settings
+                    </h1>
+
+                    <p>
+                        DOLLHOUSE preferences
+                    </p>
+
+                </div>
+
             </div>
+
+
+            <main class="page-content">
+
+                <div class="settings-card">
+
+
+                    <div class="setting-row">
+
+                        <div>
+
+                            <h3>
+                                Notifications
+                            </h3>
+
+                            <p>
+                                Property and scan updates
+                            </p>
+
+                        </div>
+
+                        <input
+                            type="checkbox"
+                            checked
+                        >
+
+                    </div>
+
+
+                    <div class="setting-row">
+
+                        <div>
+
+                            <h3>
+                                AI Property Alerts
+                            </h3>
+
+                            <p>
+                                Receive important AI findings
+                            </p>
+
+                        </div>
+
+                        <input
+                            type="checkbox"
+                            checked
+                        >
+
+                    </div>
+
+
+                    <div class="setting-row">
+
+                        <div>
+
+                            <h3>
+                                Automatic Scan History
+                            </h3>
+
+                            <p>
+                                Save completed scan records
+                            </p>
+
+                        </div>
+
+                        <input
+                            type="checkbox"
+                            checked
+                        >
+
+                    </div>
+
+
+                    <div class="setting-row danger-setting">
+
+                        <div>
+
+                            <h3>
+                                Reset Prototype Data
+                            </h3>
+
+                            <p>
+                                Delete locally stored DOLLHOUSE data
+                            </p>
+
+                        </div>
+
+                        <button
+                            class="danger-button"
+                            onclick="resetAppData()"
+                        >
+                            RESET
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </main>
 
         </div>
-
-
-        <main class="page-content">
-
-            <div class="settings-card">
-
-                <div class="setting-row">
-
-                    <div>
-                        <h3>Notifications</h3>
-                        <p>Property and scan updates</p>
-                    </div>
-
-                    <input
-                        type="checkbox"
-                        checked
-                    >
-
-                </div>
-
-
-                <div class="setting-row">
-
-                    <div>
-                        <h3>AI Property Alerts</h3>
-                        <p>Receive important AI findings</p>
-                    </div>
-
-                    <input
-                        type="checkbox"
-                        checked
-                    >
-
-                </div>
-
-
-                <div class="setting-row">
-
-                    <div>
-                        <h3>Automatic Scan History</h3>
-                        <p>Save completed scan records</p>
-                    </div>
-
-                    <input
-                        type="checkbox"
-                        checked
-                    >
-
-                </div>
-
-            </div>
-
-        </main>
 
     </section>
 
 
-    <!-- ========================================= -->
+    <!-- ================================================= -->
     <!-- SCANNER -->
-    <!-- ========================================= -->
+    <!-- ================================================= -->
 
     <section
         id="scannerScreen"
@@ -754,21 +1070,25 @@
 
         <div class="scanner-background">
 
-            <div class="laser laser1"></div>
-            <div class="laser laser2"></div>
-            <div class="laser laser3"></div>
-            <div class="laser laser4"></div>
-            <div class="laser laser5"></div>
-            <div class="laser laser6"></div>
-            <div class="laser laser7"></div>
-            <div class="laser laser8"></div>
+            <div class="scanner-grid"></div>
 
-            <div class="scan-grid"></div>
+
+            <div class="laser laser-1"></div>
+            <div class="laser laser-2"></div>
+            <div class="laser laser-3"></div>
+            <div class="laser laser-4"></div>
+            <div class="laser laser-5"></div>
+            <div class="laser laser-6"></div>
+            <div class="laser laser-7"></div>
+            <div class="laser laser-8"></div>
+            <div class="laser laser-9"></div>
+            <div class="laser laser-10"></div>
 
         </div>
 
 
         <div class="scanner-interface">
+
 
             <div class="scanner-top">
 
@@ -776,7 +1096,7 @@
                     class="glass-button"
                     onclick="cancelScan()"
                 >
-                    ✕
+                    ×
                 </button>
 
                 <div class="scanner-title">
@@ -793,18 +1113,19 @@
             </div>
 
 
-            <div class="scanner-center">
+            <div class="scanner-main">
 
-                <div class="scan-ring">
+                <div class="scanner-ring">
 
                     <div
-                        class="scan-percentage"
                         id="scanPercentage"
+                        class="scan-percentage"
                     >
                         0%
                     </div>
 
                 </div>
+
 
                 <h2 id="scanStatus">
                     Preparing Scanner
@@ -814,12 +1135,25 @@
                     Move slowly around the property.
                 </p>
 
+
+                <div class="scan-mode">
+
+                    <span class="mode-active">
+                        CAMERA
+                    </span>
+
+                    <span>
+                        + LiDAR
+                    </span>
+
+                </div>
+
             </div>
 
 
             <div class="scanner-bottom">
 
-                <div class="progress-container">
+                <div class="progress-track">
 
                     <div
                         id="scanProgress"
@@ -828,7 +1162,8 @@
 
                 </div>
 
-                <div class="scan-info">
+
+                <div class="scanner-stats">
 
                     <span id="roomCount">
                         ROOMS: 0
@@ -847,24 +1182,38 @@
     </section>
 
 
-    <!-- ========================================= -->
-    <!-- MODEL RESULT -->
-    <!-- ========================================= -->
+    <!-- ================================================= -->
+    <!-- 3D MODEL -->
+    <!-- ================================================= -->
 
     <section id="modelScreen" class="screen">
 
         <div class="model-header">
 
             <button
+                id="modelBackButton"
                 class="back-button"
                 onclick="showScreen('dashboardScreen')"
             >
                 ←
             </button>
 
-            <h1>DOLLHOUSE</h1>
+
+            <div>
+
+                <h1>
+                    DOLLHOUSE
+                </h1>
+
+                <p id="modelDate">
+                    3D PROPERTY MODEL
+                </p>
+
+            </div>
+
 
             <button
+                class="delete-button"
                 onclick="deleteCurrentScan()"
                 aria-label="Delete scan"
             >
@@ -876,26 +1225,48 @@
 
         <div class="model-viewer">
 
+            <div class="model-glow"></div>
+
+
             <div class="model-room">
 
-                <div class="model-wall wall-back"></div>
+                <div class="model-wall model-back-wall"></div>
 
-                <div class="model-wall wall-left"></div>
+                <div class="model-wall model-left-wall"></div>
 
                 <div class="model-floor"></div>
+
+                <div class="model-ceiling"></div>
 
                 <div class="model-door"></div>
 
                 <div class="model-window"></div>
 
-                <div class="model-furniture">
+                <div class="model-furniture furniture-1">
                     ◇
+                </div>
+
+                <div class="model-furniture furniture-2">
+                    □
+                </div>
+
+                <div class="model-furniture furniture-3">
+                    ○
                 </div>
 
             </div>
 
-            <div class="model-label">
-                3D PROPERTY MODEL
+
+            <div class="model-overlay">
+
+                <span>
+                    3D PROPERTY MODEL
+                </span>
+
+                <span>
+                    INTERACTIVE
+                </span>
+
             </div>
 
         </div>
@@ -903,37 +1274,52 @@
 
         <div class="model-information">
 
-            <h2>Scan Complete</h2>
+            <span class="success-label">
+                ✓ SCAN COMPLETE
+            </span>
 
-            <div class="stats-grid">
+            <h2 id="modelTitle">
+                Property Scan
+            </h2>
 
-                <div class="stat">
+
+            <div class="model-stats">
+
+                <div class="model-stat">
 
                     <strong id="finalRooms">
                         1
                     </strong>
 
-                    <span>Rooms</span>
+                    <span>
+                        ROOMS
+                    </span>
 
                 </div>
 
-                <div class="stat">
+
+                <div class="model-stat">
 
                     <strong id="finalObjects">
                         0
                     </strong>
 
-                    <span>Objects</span>
+                    <span>
+                        OBJECTS
+                    </span>
 
                 </div>
 
-                <div class="stat">
 
-                    <strong>
+                <div class="model-stat">
+
+                    <strong id="modelSize">
                         3D
                     </strong>
 
-                    <span>Model</span>
+                    <span>
+                        MODEL
+                    </span>
 
                 </div>
 
@@ -952,76 +1338,100 @@
     </section>
 
 
-    <!-- ========================================= -->
-    <!-- AI -->
-    <!-- ========================================= -->
+    <!-- ================================================= -->
+    <!-- AI PROPERTY ASSISTANT -->
+    <!-- ================================================= -->
 
     <section id="aiScreen" class="screen">
 
-        <div class="ai-header">
+        <div class="ai-page">
 
-            <button
-                class="back-button"
-                onclick="showScreen('dashboardScreen')"
-            >
-                ←
-            </button>
+            <div class="ai-header">
 
-            <div>
-
-                <h1>DOLLHOUSE AI</h1>
-
-                <p>
-                    Property Assistant
-                </p>
-
-            </div>
-
-        </div>
+                <button
+                    class="back-button"
+                    onclick="showScreen('dashboardScreen')"
+                >
+                    ←
+                </button>
 
 
-        <div
-            id="chatMessages"
-            class="chat-messages"
-        >
+                <div class="ai-title">
 
-            <div class="ai-message">
+                    <div class="ai-icon-small">
+                        ✦
+                    </div>
 
-                Hi! I'm DOLLHOUSE AI.
-                I can help you understand your
-                properties, scans, changes, and
-                maintenance information.
+                    <div>
+
+                        <h1>
+                            DOLLHOUSE AI
+                        </h1>
+
+                        <p>
+                            Property Assistant
+                        </p>
+
+                    </div>
+
+                </div>
 
             </div>
 
-        </div>
 
-
-        <div class="chat-input-container">
-
-            <input
-                id="chatInput"
-                type="text"
-                placeholder="Ask DOLLHOUSE AI..."
-                onkeydown="handleChatKey(event)"
+            <div
+                id="chatMessages"
+                class="chat-messages"
             >
 
-            <button onclick="sendMessage()">
-                ↑
-            </button>
+                <div class="ai-message">
+
+                    <span class="message-icon">
+                        ✦
+                    </span>
+
+                    <p>
+                        Hi! I'm DOLLHOUSE AI. I can help
+                        you understand your properties,
+                        scans, changes, and maintenance
+                        information.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="chat-input-container">
+
+                <input
+                    id="chatInput"
+                    type="text"
+                    placeholder="Ask DOLLHOUSE AI..."
+                    onkeydown="handleChatKey(event)"
+                >
+
+                <button
+                    onclick="sendMessage()"
+                    aria-label="Send message"
+                >
+                    ↑
+                </button>
+
+            </div>
 
         </div>
 
     </section>
 
 
-    <!-- ========================================= -->
+    <!-- ================================================= -->
     <!-- PREMIUM -->
-    <!-- ========================================= -->
+    <!-- ================================================= -->
 
     <section id="premiumScreen" class="screen">
 
-        <div class="premium-container">
+        <div class="premium-page">
 
             <button
                 class="back-button"
@@ -1031,90 +1441,129 @@
             </button>
 
 
-            <div class="premium-icon">
-                ✦
+            <div class="premium-hero">
+
+                <div class="premium-icon">
+                    ✦
+                </div>
+
+                <span class="premium-label">
+                    DOLLHOUSE
+                </span>
+
+                <h1>
+                    PREMIUM
+                </h1>
+
+                <p>
+                    Unlock the full DOLLHOUSE experience.
+                </p>
+
             </div>
 
-            <h1>
-                DOLLHOUSE PREMIUM
-            </h1>
 
-            <p class="subtitle">
-                Unlock the full DOLLHOUSE experience.
-            </p>
+            <!-- FEATURES -->
 
+            <div class="premium-feature-list">
 
-            <!-- PREMIUM FEATURES -->
+                <div class="premium-feature">
 
-            <div class="premium-features">
-
-                <div>
                     <span>✓</span>
+
                     <p>
                         Larger property scanning limits
                     </p>
+
                 </div>
 
-                <div>
+
+                <div class="premium-feature">
+
                     <span>✓</span>
+
                     <p>
                         Unlimited property scan history
                     </p>
+
                 </div>
 
-                <div>
+
+                <div class="premium-feature">
+
                     <span>✓</span>
+
                     <p>
                         Compare scans from different dates
                     </p>
+
                 </div>
 
-                <div>
+
+                <div class="premium-feature">
+
                     <span>✓</span>
+
                     <p>
                         AI change detection
                     </p>
+
                 </div>
 
-                <div>
+
+                <div class="premium-feature">
+
                     <span>✓</span>
+
                     <p>
                         AI maintenance insights
                     </p>
+
                 </div>
 
-                <div>
+
+                <div class="premium-feature">
+
                     <span>✓</span>
+
                     <p>
                         Detailed property reports
                     </p>
+
                 </div>
 
-                <div>
+
+                <div class="premium-feature">
+
                     <span>✓</span>
+
                     <p>
                         Additional accounts
                     </p>
+
                 </div>
 
-                <div>
+
+                <div class="premium-feature">
+
                     <span>✓</span>
+
                     <p>
                         Offline access
                     </p>
+
                 </div>
 
             </div>
 
 
-            <!-- SUBSCRIPTION OPTIONS -->
+            <!-- SUBSCRIPTIONS -->
 
             <div class="subscription-options">
 
-                <!-- WEEKLY -->
 
                 <button
                     class="subscription-card"
+                    data-plan="weekly"
                     onclick="selectSubscription('weekly')"
                 >
 
@@ -1134,17 +1583,17 @@
 
                     </div>
 
-                    <div class="subscription-check">
+
+                    <div class="subscription-radio">
                         ○
                     </div>
 
                 </button>
 
 
-                <!-- MONTHLY -->
-
                 <button
                     class="subscription-card"
+                    data-plan="monthly"
                     onclick="selectSubscription('monthly')"
                 >
 
@@ -1164,23 +1613,24 @@
 
                     </div>
 
-                    <div class="subscription-check">
+
+                    <div class="subscription-radio">
                         ○
                     </div>
 
                 </button>
 
 
-                <!-- YEARLY -->
-
                 <button
                     class="subscription-card yearly-plan"
+                    data-plan="yearly"
                     onclick="selectSubscription('yearly')"
                 >
 
                     <div class="best-value">
                         BEST VALUE
                     </div>
+
 
                     <div class="subscription-info">
 
@@ -1198,7 +1648,8 @@
 
                     </div>
 
-                    <div class="subscription-check">
+
+                    <div class="subscription-radio">
                         ○
                     </div>
 
@@ -1218,10 +1669,9 @@
 
             <p class="subscription-note">
 
-                Subscription functionality will be connected
-                to the appropriate payment system before release.
-
-                Prototype pricing shown for demonstration.
+                Prototype pricing only.
+                Payment processing will be connected
+                before official release.
 
             </p>
 
@@ -1231,6 +1681,10 @@
 
 </div>
 
+
+<!-- ================================================= -->
+<!-- JAVASCRIPT -->
+<!-- ================================================= -->
 
 <script src="script.js"></script>
 
