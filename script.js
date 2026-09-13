@@ -1,2813 +1,1884 @@
 /* =========================================================
    DOLLHOUSE
-   Main Stylesheet
-   ========================================================= */
+   Main Application JavaScript
+========================================================= */
 
-:root {
-    --bg: #050509;
-    --bg-soft: #0a0a11;
-    --panel: rgba(18, 18, 28, 0.82);
-    --panel-solid: #11111a;
-    --panel-light: rgba(255, 255, 255, 0.055);
 
-    --text: #f5f5f7;
-    --muted: #9696a5;
-    --muted-light: #b9b9c5;
+/* =========================================================
+   APP DATA
+========================================================= */
 
-    --line: rgba(255, 255, 255, 0.09);
-    --line-bright: rgba(255, 255, 255, 0.16);
+const STORAGE_KEY = "dollhouseAppData";
 
-    --purple: #9b7cff;
-    --blue: #6ca8ff;
-    --cyan: #56e6ff;
-    --pink: #ff72d2;
+let appData = {
+  account: null,
+  plan: "FREE",
+  properties: [],
+  currentPropertyId: null,
+  currentScanId: null
+};
 
-    --danger: #ff647c;
+let scanTimer = null;
+let scanProgressValue = 0;
+let selectedSubscription = "monthly";
 
-    --radius: 22px;
-    --radius-small: 14px;
 
-    --shadow: 0 20px 60px rgba(0, 0, 0, 0.42);
+/* =========================================================
+   STARTUP
+========================================================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  loadAppData();
+
+  setupKeyboardShortcuts();
+
+  if (appData.account) {
+    openApplication();
+  } else {
+    showScreen("welcomeScreen");
+  }
+
+});
+
+
+/* =========================================================
+   STORAGE
+========================================================= */
+
+function loadAppData() {
+
+  try {
+
+    const saved = localStorage.getItem(STORAGE_KEY);
+
+    if (saved) {
+      const parsed = JSON.parse(saved);
+
+      appData = {
+        ...appData,
+        ...parsed
+      };
+    }
+
+  } catch (error) {
+
+    console.error("Could not load DOLLHOUSE data:", error);
+
+  }
+
+}
+
+
+function saveAppData() {
+
+  try {
+
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(appData)
+    );
+
+  } catch (error) {
+
+    console.error("Could not save DOLLHOUSE data:", error);
+
+  }
+
 }
 
 
 /* =========================================================
-   RESET
-   ========================================================= */
+   SCREEN NAVIGATION
+========================================================= */
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+function showScreen(screenId) {
 
-html {
-    width: 100%;
-    min-height: 100%;
-    background: var(--bg);
-}
+  const welcome = document.getElementById("welcomeScreen");
+  const account = document.getElementById("accountScreen");
+  const mainApp = document.getElementById("mainApp");
 
-body {
-    width: 100%;
-    min-height: 100vh;
+  const allScreens = document.querySelectorAll(
+    ".screen, .app-screen"
+  );
 
-    background:
-        radial-gradient(
-            circle at 50% -10%,
-            rgba(126, 92, 255, 0.13),
-            transparent 38%
-        ),
-        radial-gradient(
-            circle at 100% 50%,
-            rgba(74, 171, 255, 0.055),
-            transparent 35%
-        ),
-        var(--bg);
+  allScreens.forEach(screen => {
+    screen.classList.remove(
+      "active-screen",
+      "active-app-screen"
+    );
+  });
 
-    color: var(--text);
+  if (screenId === "welcomeScreen") {
 
-    font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "SF Pro Display",
-        "SF Pro Text",
-        Inter,
-        Arial,
-        sans-serif;
+    if (mainApp) {
+      mainApp.classList.add("hidden");
+    }
 
-    -webkit-font-smoothing: antialiased;
-}
+    if (welcome) {
+      welcome.classList.add("active-screen");
+      welcome.style.display = "flex";
+    }
 
-button,
-input {
-    font: inherit;
-}
+    if (account) {
+      account.style.display = "none";
+    }
 
-button {
-    color: inherit;
-    border: none;
-    cursor: pointer;
-}
-
-input {
-    outline: none;
-}
+    return;
+  }
 
 
-/* =========================================================
-   APP
-   ========================================================= */
+  if (screenId === "accountScreen") {
 
-#app {
-    width: 100%;
-    min-height: 100vh;
-    overflow-x: hidden;
-}
+    if (mainApp) {
+      mainApp.classList.add("hidden");
+    }
 
+    if (welcome) {
+      welcome.style.display = "none";
+    }
 
-/* =========================================================
-   SCREENS
-   ========================================================= */
+    if (account) {
+      account.classList.add("active-screen");
+      account.style.display = "flex";
+    }
 
-.screen {
-    display: none;
-
-    width: 100%;
-    min-height: 100vh;
-
-    position: relative;
-}
-
-.screen.active {
-    display: block;
-}
+    return;
+  }
 
 
-/* =========================================================
-   COMMON
-   ========================================================= */
+  if (welcome) {
+    welcome.style.display = "none";
+  }
 
-.primary-button {
-    width: 100%;
+  if (account) {
+    account.style.display = "none";
+  }
 
-    min-height: 56px;
+  if (mainApp) {
+    mainApp.classList.remove("hidden");
+  }
 
-    border-radius: 16px;
 
-    background:
-        linear-gradient(
-            135deg,
-            var(--purple),
-            #6f8dff
-        );
+  const target = document.getElementById(screenId);
 
-    color: white;
+  if (target) {
 
-    font-size: 14px;
-    font-weight: 800;
-    letter-spacing: 1.2px;
+    document.querySelectorAll(".app-screen").forEach(screen => {
+      screen.classList.remove("active-app-screen");
+    });
 
-    box-shadow:
-        0 12px 35px rgba(125, 102, 255, 0.28);
+    target.classList.add("active-app-screen");
 
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease,
-        opacity 0.2s ease;
-}
+  }
 
-.primary-button:hover {
-    transform: translateY(-2px);
 
-    box-shadow:
-        0 16px 42px rgba(125, 102, 255, 0.38);
-}
+  updateNavigation(screenId);
 
-.primary-button:active {
-    transform: scale(0.98);
+  closeMenu();
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
 }
 
 
-.back-button {
-    width: 44px;
-    height: 44px;
+function openApplication() {
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  showScreen("dashboardScreen");
 
-    border-radius: 13px;
+  updateUserInterface();
 
-    background: rgba(255, 255, 255, 0.055);
+  renderDashboard();
+  renderProperties();
 
-    border: 1px solid var(--line);
-
-    color: white;
-
-    font-size: 23px;
-
-    transition: 0.2s ease;
-}
-
-.back-button:hover {
-    background: rgba(255, 255, 255, 0.1);
 }
 
 
-.secondary-button {
-    padding: 11px 17px;
+function navigateFromMenu(screenId) {
 
-    border-radius: 11px;
+  showScreen(screenId);
 
-    background: rgba(255, 255, 255, 0.07);
-
-    border: 1px solid var(--line);
-
-    color: white;
-
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.8px;
-}
-
-
-.text-button {
-    background: transparent;
-
-    color: var(--purple);
-
-    font-size: 11px;
-    font-weight: 800;
-
-    letter-spacing: 0.8px;
-}
-
-
-.icon-button {
-    width: 44px;
-    height: 44px;
-
-    border-radius: 13px;
-
-    background: rgba(255, 255, 255, 0.055);
-
-    border: 1px solid var(--line);
-
-    font-size: 22px;
-}
-
-
-/* =========================================================
-   WELCOME
-   ========================================================= */
-
-#welcomeScreen {
-    display: none;
-
-    align-items: center;
-    justify-content: center;
-
-    padding: 40px 20px;
-}
-
-#welcomeScreen.active {
-    display: flex;
-}
-
-.welcome-container {
-    width: min(560px, 100%);
-
-    text-align: center;
-}
-
-
-.logo-area {
-    position: relative;
-
-    display: inline-block;
-
-    margin-bottom: 12px;
-}
-
-.main-logo {
-    position: relative;
-    z-index: 2;
-
-    font-size: clamp(38px, 9vw, 64px);
-
-    font-weight: 900;
-
-    letter-spacing: 5px;
-
-    background:
-        linear-gradient(
-            90deg,
-            #ffffff,
-            #b8a5ff,
-            #ffffff,
-            #79dfff,
-            #ffffff
-        );
-
-    background-size: 250% auto;
-
-    -webkit-background-clip: text;
-    background-clip: text;
-
-    color: transparent;
-
-    animation: logoShift 7s linear infinite;
-}
-
-.logo-glow {
-    position: absolute;
-
-    width: 80%;
-    height: 80%;
-
-    left: 10%;
-    top: 10%;
-
-    background:
-        linear-gradient(
-            90deg,
-            var(--purple),
-            var(--cyan),
-            var(--pink)
-        );
-
-    filter: blur(35px);
-
-    opacity: 0.25;
-
-    animation: glowPulse 3s ease-in-out infinite;
-}
-
-.tagline {
-    color: var(--muted-light);
-
-    font-size: 15px;
-
-    letter-spacing: 1.5px;
-
-    margin-bottom: 42px;
-}
-
-
-.welcome-features {
-    display: grid;
-
-    gap: 13px;
-
-    text-align: left;
-
-    margin-bottom: 28px;
-}
-
-.feature-card {
-    display: flex;
-    align-items: center;
-
-    gap: 16px;
-
-    padding: 18px;
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(255,255,255,0.065),
-            rgba(255,255,255,0.025)
-        );
-
-    border: 1px solid var(--line);
-
-    border-radius: var(--radius-small);
-
-    backdrop-filter: blur(20px);
-
-    box-shadow: var(--shadow);
-}
-
-.feature-icon {
-    flex: 0 0 48px;
-
-    width: 48px;
-    height: 48px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 15px;
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(155,124,255,0.18),
-            rgba(86,230,255,0.1)
-        );
-
-    border: 1px solid rgba(155,124,255,0.22);
-
-    color: white;
-
-    font-size: 23px;
-}
-
-.feature-card h3 {
-    font-size: 14px;
-
-    margin-bottom: 5px;
-}
-
-.feature-card p {
-    color: var(--muted);
-
-    font-size: 12px;
-
-    line-height: 1.5;
-}
-
-
-/* =========================================================
-   ACCOUNT
-   ========================================================= */
-
-#accountScreen,
-#termsScreen {
-    padding: 30px 20px;
-}
-
-.account-container,
-.page-container {
-    width: min(620px, 100%);
-
-    margin: 0 auto;
-}
-
-.account-container {
-    padding-top: 15px;
-}
-
-.account-logo {
-    margin-top: 38px;
-
-    color: var(--muted);
-
-    font-size: 11px;
-    font-weight: 900;
-
-    letter-spacing: 3px;
-}
-
-.account-container h1 {
-    margin-top: 15px;
-
-    font-size: 34px;
-
-    letter-spacing: -1px;
-}
-
-.screen-subtitle {
-    margin-top: 10px;
-
-    color: var(--muted);
-
-    font-size: 14px;
-
-    line-height: 1.6;
-}
-
-
-.form-group {
-    margin-top: 26px;
-}
-
-.form-group label {
-    display: block;
-
-    margin-bottom: 9px;
-
-    color: var(--muted-light);
-
-    font-size: 12px;
-    font-weight: 700;
-}
-
-
-.form-group input {
-    width: 100%;
-
-    height: 54px;
-
-    padding: 0 16px;
-
-    border-radius: 14px;
-
-    border: 1px solid var(--line);
-
-    background: rgba(255, 255, 255, 0.055);
-
-    color: white;
-
-    font-size: 15px;
-
-    transition: 0.2s ease;
-}
-
-.form-group input:focus {
-    border-color: rgba(155, 124, 255, 0.7);
-
-    box-shadow:
-        0 0 0 4px rgba(155, 124, 255, 0.09);
-}
-
-.form-group input::placeholder {
-    color: #666675;
-}
-
-.input-note,
-.account-note {
-    color: var(--muted);
-
-    font-size: 11px;
-
-    line-height: 1.5;
-}
-
-.input-note {
-    margin-top: 8px;
-}
-
-
-.terms-container {
-    display: flex;
-
-    align-items: flex-start;
-
-    gap: 10px;
-
-    margin: 25px 0;
-
-    color: var(--muted-light);
-
-    font-size: 12px;
-
-    line-height: 1.5;
-}
-
-.terms-container input {
-    width: 17px;
-    height: 17px;
-
-    margin-top: 1px;
-
-    accent-color: var(--purple);
-
-    flex-shrink: 0;
-}
-
-.inline-link {
-    background: none;
-
-    color: var(--purple);
-
-    font-weight: 700;
-
-    text-decoration: underline;
-}
-
-.account-note {
-    text-align: center;
-
-    margin-top: 15px;
-}
-
-
-/* =========================================================
-   PAGE HEADER
-   ========================================================= */
-
-.page-header {
-    display: flex;
-    align-items: center;
-
-    gap: 15px;
-
-    padding: 28px 0 24px;
-}
-
-.page-header > div {
-    flex: 1;
-}
-
-.page-header h1 {
-    font-size: 27px;
-
-    letter-spacing: -0.7px;
-}
-
-.page-header p {
-    color: var(--muted);
-
-    font-size: 12px;
-
-    margin-top: 4px;
-}
-
-
-/* =========================================================
-   CONTENT CARD
-   ========================================================= */
-
-.content-card {
-    padding: 24px;
-
-    background: var(--panel);
-
-    border: 1px solid var(--line);
-
-    border-radius: var(--radius);
-
-    box-shadow: var(--shadow);
-}
-
-.content-card h2 {
-    margin-bottom: 14px;
-}
-
-.content-card h3 {
-    margin-top: 24px;
-    margin-bottom: 8px;
-
-    font-size: 15px;
-}
-
-.content-card p {
-    color: var(--muted-light);
-
-    font-size: 13px;
-
-    line-height: 1.7;
-
-    margin-bottom: 10px;
-}
-
-.content-card .primary-button {
-    margin-top: 22px;
-}
-
-
-/* =========================================================
-   DASHBOARD
-   ========================================================= */
-
-#dashboardScreen {
-    padding-bottom: 50px;
-}
-
-.top-bar {
-    display: flex;
-
-    align-items: center;
-    justify-content: space-between;
-
-    gap: 15px;
-
-    padding:
-        22px
-        max(22px, env(safe-area-inset-right))
-        20px
-        max(22px, env(safe-area-inset-left));
-
-    border-bottom: 1px solid var(--line);
-
-    background: rgba(5, 5, 9, 0.7);
-
-    backdrop-filter: blur(25px);
-
-    position: sticky;
-    top: 0;
-    z-index: 20;
-}
-
-.top-bar-left {
-    display: flex;
-    align-items: center;
-
-    gap: 13px;
-}
-
-.menu-button {
-    width: 43px;
-    height: 43px;
-
-    border-radius: 12px;
-
-    background: rgba(255, 255, 255, 0.06);
-
-    border: 1px solid var(--line);
-
-    font-size: 20px;
-}
-
-.brand-small h1 {
-    font-size: 17px;
-
-    letter-spacing: 2px;
-}
-
-.brand-small p {
-    color: var(--muted);
-
-    font-size: 10px;
-
-    margin-top: 3px;
-}
-
-.premium-button {
-    padding: 10px 13px;
-
-    border-radius: 11px;
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(155,124,255,0.18),
-            rgba(86,230,255,0.08)
-        );
-
-    border: 1px solid rgba(155,124,255,0.28);
-
-    color: #dcd5ff;
-
-    font-size: 10px;
-
-    font-weight: 900;
-
-    letter-spacing: 0.7px;
-}
-
-
-.dashboard-content {
-    width: min(760px, 100%);
-
-    margin: 0 auto;
-
-    padding: 24px 20px;
 }
 
 
 /* =========================================================
    SIDE MENU
-   ========================================================= */
+========================================================= */
 
-.side-menu {
-    position: fixed;
+function toggleMenu() {
 
-    left: 0;
-    top: 0;
+  const menu = document.getElementById("sideMenu");
 
-    width: min(330px, 88vw);
-    height: 100vh;
+  if (!menu) return;
 
-    z-index: 100;
+  menu.classList.toggle("open");
 
-    padding: 22px;
-
-    background:
-        linear-gradient(
-            180deg,
-            #11111b,
-            #08080d
-        );
-
-    border-right: 1px solid var(--line);
-
-    box-shadow: 20px 0 60px rgba(0,0,0,0.45);
-
-    transform: translateX(-105%);
-
-    transition: transform 0.3s ease;
 }
 
-.side-menu.open {
-    transform: translateX(0);
+
+function closeMenu() {
+
+  const menu = document.getElementById("sideMenu");
+
+  if (!menu) return;
+
+  menu.classList.remove("open");
+
 }
 
-.menu-top {
-    display: flex;
 
-    align-items: center;
-    justify-content: space-between;
+function updateNavigation(screenId) {
 
-    padding-bottom: 25px;
+  document.querySelectorAll(".menu-item").forEach(item => {
 
-    border-bottom: 1px solid var(--line);
+    item.classList.remove("active");
 
-    margin-bottom: 15px;
-}
+    if (item.dataset.screen === screenId) {
+      item.classList.add("active");
+    }
 
-.menu-brand {
-    font-size: 14px;
+  });
 
-    font-weight: 900;
-
-    letter-spacing: 2.5px;
-}
-
-.menu-close {
-    width: 38px;
-    height: 38px;
-
-    border-radius: 10px;
-
-    background: rgba(255,255,255,0.06);
-
-    border: 1px solid var(--line);
-
-    font-size: 21px;
-}
-
-.menu-item {
-    width: 100%;
-
-    display: flex;
-    align-items: center;
-
-    gap: 15px;
-
-    padding: 15px;
-
-    margin-bottom: 5px;
-
-    background: transparent;
-
-    border-radius: 12px;
-
-    color: var(--muted-light);
-
-    text-align: left;
-
-    font-size: 13px;
-
-    transition: 0.2s ease;
-}
-
-.menu-item span {
-    width: 22px;
-
-    text-align: center;
-
-    font-size: 17px;
-}
-
-.menu-item:hover,
-.active-menu-item {
-    background: rgba(155,124,255,0.11);
-
-    color: white;
-}
-
-.menu-divider {
-    height: 1px;
-
-    background: var(--line);
-
-    margin: 15px 0;
-}
-
-.logout-item {
-    color: #ff8799;
 }
 
 
 /* =========================================================
-   NEW SCAN CARD
-   ========================================================= */
+   ACCOUNT
+========================================================= */
 
-.new-scan-card {
-    width: 100%;
+function createAccount() {
 
-    display: flex;
-    align-items: center;
+  const emailInput = document.getElementById("emailInput");
+  const passwordInput = document.getElementById("passwordInput");
+  const termsCheckbox = document.getElementById("termsCheckbox");
+  const error = document.getElementById("accountError");
 
-    gap: 17px;
+  if (!emailInput || !passwordInput || !termsCheckbox) {
+    return;
+  }
 
-    padding: 22px;
+  const email = emailInput.value.trim();
+  const password = passwordInput.value;
 
-    text-align: left;
+  if (error) {
+    error.textContent = "";
+  }
 
-    border-radius: var(--radius);
 
-    background:
-        linear-gradient(
-            135deg,
-            rgba(155,124,255,0.17),
-            rgba(86,230,255,0.055)
-        );
+  /* Email validation */
 
-    border: 1px solid rgba(155,124,255,0.24);
+  if (!email.includes("@") || !email.includes(".")) {
 
-    box-shadow:
-        0 20px 55px rgba(55, 38, 130, 0.16);
+    if (error) {
+      error.textContent = "Please enter a valid email address.";
+    }
 
-    transition: 0.2s ease;
+    emailInput.focus();
+
+    return;
+  }
+
+
+  /* Password validation */
+
+  if (password.length < 8) {
+
+    if (error) {
+      error.textContent =
+        "Your password must be at least 8 characters.";
+    }
+
+    passwordInput.focus();
+
+    return;
+  }
+
+
+  /* Terms */
+
+  if (!termsCheckbox.checked) {
+
+    if (error) {
+      error.textContent =
+        "Please agree to the Terms & Conditions.";
+    }
+
+    return;
+  }
+
+
+  appData.account = {
+    email: email,
+    createdAt: new Date().toISOString()
+  };
+
+
+  if (!appData.plan) {
+    appData.plan = "FREE";
+  }
+
+
+  saveAppData();
+
+  showNotification("Account created successfully.");
+
+  openApplication();
+
 }
 
-.new-scan-card:hover {
-    transform: translateY(-2px);
 
-    border-color: rgba(155,124,255,0.4);
-}
+function logout() {
 
-.new-scan-icon {
-    width: 58px;
-    height: 58px;
+  const confirmed = confirm(
+    "Are you sure you want to log out?"
+  );
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  if (!confirmed) {
+    return;
+  }
 
-    flex-shrink: 0;
+  closeMenu();
 
-    border-radius: 18px;
+  showScreen("welcomeScreen");
 
-    background:
-        linear-gradient(
-            135deg,
-            rgba(155,124,255,0.24),
-            rgba(86,230,255,0.13)
-        );
+  showNotification("You have been logged out.");
 
-    font-size: 29px;
-
-    box-shadow:
-        0 0 35px rgba(155,124,255,0.12);
-}
-
-.new-scan-text {
-    flex: 1;
-}
-
-.card-label {
-    color: var(--cyan);
-
-    font-size: 9px;
-
-    font-weight: 900;
-
-    letter-spacing: 1.5px;
-}
-
-.new-scan-text h2 {
-    font-size: 19px;
-
-    margin-top: 4px;
-}
-
-.new-scan-text p {
-    color: var(--muted);
-
-    font-size: 11px;
-
-    line-height: 1.5;
-
-    margin-top: 4px;
-}
-
-.card-arrow {
-    color: var(--muted-light);
-
-    font-size: 23px;
 }
 
 
 /* =========================================================
-   PLAN CARD
-   ========================================================= */
+   USER INTERFACE
+========================================================= */
 
-.plan-card {
-    display: flex;
+function updateUserInterface() {
 
-    align-items: center;
-    justify-content: space-between;
+  const email = appData.account
+    ? appData.account.email
+    : "—";
 
-    gap: 15px;
-
-    margin-top: 14px;
-
-    padding: 19px;
-
-    background: rgba(255,255,255,0.035);
-
-    border: 1px solid var(--line);
-
-    border-radius: var(--radius-small);
-}
-
-.small-label {
-    display: block;
-
-    color: var(--muted);
-
-    font-size: 9px;
-
-    font-weight: 900;
-
-    letter-spacing: 1.2px;
-}
-
-.plan-card h3 {
-    margin-top: 5px;
-
-    font-size: 17px;
-}
-
-.plan-card p {
-    color: var(--muted);
-
-    font-size: 11px;
-
-    margin-top: 3px;
-}
+  const plan = appData.plan || "FREE";
 
 
-/* =========================================================
-   SECTION TITLES
-   ========================================================= */
+  const profileEmail =
+    document.getElementById("profileEmail");
 
-.section-title-row {
-    display: flex;
+  const profilePlan =
+    document.getElementById("profilePlan");
 
-    align-items: center;
-    justify-content: space-between;
+  const dashboardPlan =
+    document.getElementById("dashboardPlan");
 
-    margin: 30px 0 13px;
-}
+  const menuPlan =
+    document.getElementById("menuPlan");
 
-.section-title-row h2 {
-    font-size: 17px;
+
+  if (profileEmail) {
+    profileEmail.textContent = email;
+  }
+
+  if (profilePlan) {
+    profilePlan.textContent = plan;
+  }
+
+  if (dashboardPlan) {
+    dashboardPlan.textContent = plan;
+  }
+
+  if (menuPlan) {
+    menuPlan.textContent = plan;
+  }
+
+
+  updateAvatar();
+
 }
 
 
-/* =========================================================
-   EMPTY STATES
-   ========================================================= */
+function updateAvatar() {
 
-.empty-state {
-    padding: 48px 20px;
+  const avatar =
+    document.getElementById("topProfileAvatar");
 
-    text-align: center;
+  if (!avatar || !appData.account) {
+    return;
+  }
 
-    border: 1px dashed rgba(255,255,255,0.11);
+  const email = appData.account.email;
 
-    border-radius: var(--radius);
+  const firstLetter =
+    email.charAt(0).toUpperCase();
 
-    background: rgba(255,255,255,0.018);
-}
+  avatar.textContent = firstLetter + "H";
 
-.empty-state-icon {
-    width: 55px;
-    height: 55px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    margin: 0 auto 14px;
-
-    border-radius: 17px;
-
-    background: rgba(155,124,255,0.09);
-
-    color: var(--purple);
-
-    font-size: 25px;
-}
-
-.empty-state h3 {
-    font-size: 15px;
-
-    margin-bottom: 6px;
-}
-
-.empty-state p {
-    max-width: 310px;
-
-    margin: auto;
-
-    color: var(--muted);
-
-    font-size: 12px;
-
-    line-height: 1.6;
 }
 
 
 /* =========================================================
-   SEARCH
-   ========================================================= */
+   DASHBOARD
+========================================================= */
 
-.search-box {
-    display: flex;
-    align-items: center;
+function renderDashboard() {
 
-    gap: 10px;
+  const propertyCount =
+    document.getElementById("propertyCount");
 
-    height: 50px;
+  const scanCount =
+    document.getElementById("scanCount");
 
-    padding: 0 15px;
+  const lastScanDate =
+    document.getElementById("lastScanDate");
 
-    border-radius: 14px;
+  const savedScans =
+    document.getElementById("savedScans");
 
-    background: rgba(255,255,255,0.045);
 
-    border: 1px solid var(--line);
-}
+  const properties = appData.properties || [];
 
-.search-box span {
-    color: var(--muted);
+  const allScans = properties.flatMap(
+    property => property.scans || []
+  );
 
-    font-size: 20px;
-}
 
-.search-box input {
-    width: 100%;
+  if (propertyCount) {
+    propertyCount.textContent = properties.length;
+  }
 
-    border: none;
+  if (scanCount) {
+    scanCount.textContent = allScans.length;
+  }
 
-    background: transparent;
 
-    color: white;
+  if (lastScanDate) {
 
-    font-size: 14px;
-}
+    if (allScans.length === 0) {
 
-.search-box input::placeholder {
-    color: #686875;
+      lastScanDate.textContent = "—";
+
+    } else {
+
+      const newest = [...allScans].sort(
+        (a, b) =>
+          new Date(b.date) - new Date(a.date)
+      )[0];
+
+      lastScanDate.textContent =
+        formatDate(newest.date);
+
+    }
+
+  }
+
+
+  if (savedScans) {
+
+    if (allScans.length === 0) {
+
+      savedScans.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-symbol">◇</div>
+          <h4>No scans yet</h4>
+          <p>
+            Start your first property scan
+            to see it here.
+          </p>
+          <button
+            class="secondary-button"
+            onclick="startScan()">
+            Create First Scan
+          </button>
+        </div>
+      `;
+
+      return;
+    }
+
+
+    const recentScans = [...allScans]
+      .sort(
+        (a, b) =>
+          new Date(b.date) - new Date(a.date)
+      )
+      .slice(0, 5);
+
+
+    savedScans.innerHTML =
+      recentScans.map(scan => {
+
+        const property =
+          properties.find(
+            p => p.id === scan.propertyId
+          );
+
+        return `
+          <div class="scan-item">
+
+            <div>
+              <h4>
+                ${escapeHTML(
+                  property?.name || "Property"
+                )}
+              </h4>
+
+              <p>
+                ${formatDate(scan.date)}
+                · ${scan.rooms} rooms
+                · ${scan.objects} objects
+              </p>
+            </div>
+
+            <button
+              class="secondary-button"
+              onclick="openScan('${scan.id}', '${scan.propertyId}')">
+              Open
+            </button>
+
+          </div>
+        `;
+
+      }).join("");
+
+  }
+
 }
 
 
 /* =========================================================
-   PAGE CONTENT
-   ========================================================= */
+   PROPERTY LIST
+========================================================= */
 
-.page-content {
-    padding-bottom: 50px;
+function renderProperties(searchTerm = "") {
+
+  const container =
+    document.getElementById("allProperties");
+
+  if (!container) {
+    return;
+  }
+
+
+  let properties = appData.properties || [];
+
+  const term = searchTerm
+    .trim()
+    .toLowerCase();
+
+
+  if (term) {
+
+    properties = properties.filter(property =>
+      property.name.toLowerCase().includes(term)
+    );
+
+  }
+
+
+  if (properties.length === 0) {
+
+    container.innerHTML = `
+      <div class="empty-state">
+
+        <div class="empty-symbol">
+          ◇
+        </div>
+
+        <h4>
+          ${term
+            ? "No matching properties"
+            : "No properties yet"}
+        </h4>
+
+        <p>
+          ${term
+            ? "Try another search."
+            : "Your scanned properties will appear here."}
+        </p>
+
+      </div>
+    `;
+
+    return;
+  }
+
+
+  container.innerHTML =
+    properties.map(property => {
+
+      const scans =
+        property.scans || [];
+
+      const latest =
+        [...scans].sort(
+          (a, b) =>
+            new Date(b.date) - new Date(a.date)
+        )[0];
+
+
+      return `
+        <div class="property-card">
+
+          <span class="eyebrow">
+            PROPERTY
+          </span>
+
+          <h3>
+            ${escapeHTML(property.name)}
+          </h3>
+
+          <p>
+            ${scans.length} scan${scans.length === 1 ? "" : "s"}
+            ${latest
+              ? ` · Last scan ${formatDate(latest.date)}`
+              : ""}
+          </p>
+
+          <div class="property-card-footer">
+
+            <span>
+              ${latest
+                ? `${latest.rooms} rooms · ${latest.objects} objects`
+                : "No scans"}
+            </span>
+
+            <button
+              class="secondary-button"
+              onclick="openProperty('${property.id}')">
+              View Property
+            </button>
+
+          </div>
+
+        </div>
+      `;
+
+    }).join("");
+
+}
+
+
+function filterProperties() {
+
+  const search =
+    document.getElementById("propertySearch");
+
+  if (!search) {
+    return;
+  }
+
+  renderProperties(search.value);
+
 }
 
 
 /* =========================================================
-   PROPERTY OVERVIEW
-   ========================================================= */
+   START SCAN
+========================================================= */
 
-.property-overview {
-    display: flex;
+function startScan() {
 
-    align-items: center;
+  showScreen("scannerScreen");
 
-    gap: 15px;
+  resetScanner();
 
-    padding: 20px;
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(255,255,255,0.055),
-            rgba(255,255,255,0.025)
-        );
-
-    border: 1px solid var(--line);
-
-    border-radius: var(--radius);
 }
 
-.property-icon {
-    width: 55px;
-    height: 55px;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+function resetScanner() {
 
-    border-radius: 17px;
+  clearInterval(scanTimer);
 
-    background: rgba(155,124,255,0.1);
+  scanProgressValue = 0;
 
-    font-size: 26px;
+  const percentage =
+    document.getElementById("scanPercentage");
+
+  const progress =
+    document.getElementById("scanProgress");
+
+  const status =
+    document.getElementById("scanStatus");
+
+  const rooms =
+    document.getElementById("roomCount");
+
+  const objects =
+    document.getElementById("objectCount");
+
+  const instructions =
+    document.getElementById("scanInstructions");
+
+  const button =
+    document.getElementById("scanStartButton");
+
+
+  if (percentage) {
+    percentage.textContent = "0%";
+  }
+
+  if (progress) {
+    progress.style.width = "0%";
+  }
+
+  if (status) {
+    status.textContent = "READY";
+  }
+
+  if (rooms) {
+    rooms.textContent = "0";
+  }
+
+  if (objects) {
+    objects.textContent = "0";
+  }
+
+  if (instructions) {
+    instructions.textContent =
+      "Move slowly through the property. Capture rooms, walls, objects, and spaces.";
+  }
+
+  if (button) {
+    button.disabled = false;
+    button.textContent = "Begin Scan";
+  }
+
 }
 
-.property-overview h2 {
-    font-size: 17px;
+
+function beginScanning() {
+
+  const button =
+    document.getElementById("scanStartButton");
+
+  const status =
+    document.getElementById("scanStatus");
+
+  const instructions =
+    document.getElementById("scanInstructions");
+
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = "Scanning...";
+  }
+
+  if (status) {
+    status.textContent = "SCANNING";
+  }
+
+  if (instructions) {
+    instructions.textContent =
+      "Capturing the property. Continue moving through the space.";
+  }
+
+
+  scanProgressValue = 0;
+
+  clearInterval(scanTimer);
+
+
+  scanTimer = setInterval(() => {
+
+    scanProgressValue += Math.random() * 3.5;
+
+    if (scanProgressValue >= 100) {
+
+      scanProgressValue = 100;
+
+      updateScanner();
+
+      clearInterval(scanTimer);
+
+      finishScan();
+
+      return;
+    }
+
+    updateScanner();
+
+  }, 180);
+
 }
 
-.property-overview p {
-    color: var(--muted);
 
-    font-size: 11px;
+function updateScanner() {
 
-    margin-top: 4px;
+  const percentage =
+    document.getElementById("scanPercentage");
+
+  const progress =
+    document.getElementById("scanProgress");
+
+  const rooms =
+    document.getElementById("roomCount");
+
+  const objects =
+    document.getElementById("objectCount");
+
+
+  if (percentage) {
+    percentage.textContent =
+      Math.floor(scanProgressValue) + "%";
+  }
+
+  if (progress) {
+    progress.style.width =
+      scanProgressValue + "%";
+  }
+
+
+  const estimatedRooms =
+    Math.max(
+      1,
+      Math.floor(scanProgressValue / 18)
+    );
+
+  const estimatedObjects =
+    Math.floor(scanProgressValue * 1.8);
+
+
+  if (rooms) {
+    rooms.textContent =
+      Math.min(estimatedRooms, 6);
+  }
+
+  if (objects) {
+    objects.textContent =
+      estimatedObjects;
+  }
+
+}
+
+
+function finishScan() {
+
+  const status =
+    document.getElementById("scanStatus");
+
+  const instructions =
+    document.getElementById("scanInstructions");
+
+  const button =
+    document.getElementById("scanStartButton");
+
+
+  if (status) {
+    status.textContent = "COMPLETE";
+  }
+
+  if (instructions) {
+    instructions.textContent =
+      "Property scan complete. Generating your digital model...";
+  }
+
+
+  if (button) {
+    button.textContent = "Generating Model...";
+  }
+
+
+  setTimeout(() => {
+
+    createDemoScan();
+
+  }, 1300);
+
 }
 
 
 /* =========================================================
-   PROPERTY HISTORY
-   ========================================================= */
+   CREATE DEMO SCAN
+========================================================= */
 
-.premium-tag {
-    display: inline-flex;
+function createDemoScan() {
 
-    align-items: center;
+  const date =
+    new Date().toISOString();
 
-    padding: 5px 8px;
+  const propertyId =
+    "property-" + Date.now();
 
-    border-radius: 7px;
-
-    background: rgba(155,124,255,0.1);
-
-    border: 1px solid rgba(155,124,255,0.2);
-
-    color: #c5b7ff;
-
-    font-size: 8px;
-
-    font-weight: 900;
-
-    letter-spacing: 0.8px;
-}
-
-.property-history-card {
-    padding: 17px;
-
-    margin-bottom: 9px;
-
-    border-radius: 15px;
-
-    background: rgba(255,255,255,0.04);
-
-    border: 1px solid var(--line);
-}
+  const scanId =
+    "scan-" + Date.now();
 
 
-/* =========================================================
-   PREMIUM ANALYSIS
-   ========================================================= */
+  const property = {
+    id: propertyId,
 
-.premium-analysis {
-    margin-top: 28px;
+    name: "New Property",
 
-    padding: 20px;
+    createdAt: date,
 
-    border-radius: var(--radius);
+    scans: []
+  };
 
-    background:
-        linear-gradient(
-            145deg,
-            rgba(155,124,255,0.08),
-            rgba(255,255,255,0.025)
-        );
 
-    border: 1px solid rgba(155,124,255,0.16);
-}
+  const scan = {
 
-.analysis-header {
-    display: flex;
+    id: scanId,
 
-    justify-content: space-between;
+    propertyId: propertyId,
 
-    gap: 15px;
+    date: date,
 
-    margin-bottom: 17px;
-}
+    rooms: 6,
 
-.analysis-header h2 {
-    margin-top: 8px;
+    objects: 47,
 
-    font-size: 17px;
-}
+    size: "2,480 sq ft",
 
-.analysis-icon {
-    font-size: 26px;
+    modelReady: true,
 
-    color: var(--purple);
-}
+    summary:
+      "The property appears to contain six primary spaces with a variety of detected objects and structural elements.",
 
-.analysis-card {
-    padding: 16px;
+    maintenance:
+      "No confirmed maintenance issue can be determined from this prototype scan. A professional inspection would be required for actual property assessment."
 
-    margin-top: 9px;
+  };
 
-    border-radius: 13px;
 
-    background: rgba(0,0,0,0.2);
+  property.scans.push(scan);
 
-    border: 1px solid var(--line);
-}
+  appData.properties.push(property);
 
-.analysis-label {
-    color: var(--muted);
+  appData.currentPropertyId =
+    propertyId;
 
-    font-size: 8px;
+  appData.currentScanId =
+    scanId;
 
-    font-weight: 900;
 
-    letter-spacing: 1.1px;
-}
+  saveAppData();
 
-.analysis-card p {
-    color: var(--muted-light);
+  updateUserInterface();
 
-    font-size: 12px;
+  renderDashboard();
 
-    line-height: 1.6;
+  renderProperties();
 
-    margin-top: 7px;
-}
+  showNotification(
+    "Scan complete. Your digital property model is ready."
+  );
 
-.premium-lock-button {
-    width: 100%;
 
-    margin-top: 13px;
+  setTimeout(() => {
 
-    padding: 14px;
+    showScreen("modelScreen");
 
-    border-radius: 12px;
+    loadModel(scan, property);
 
-    background: rgba(155,124,255,0.12);
+  }, 500);
 
-    border: 1px solid rgba(155,124,255,0.2);
-
-    color: #cbbfff;
-
-    font-size: 10px;
-
-    font-weight: 900;
-
-    letter-spacing: 0.8px;
 }
 
 
 /* =========================================================
-   PROFILE
-   ========================================================= */
+   PROPERTY OPENING
+========================================================= */
 
-.profile-card {
-    padding: 30px 20px;
+function openProperty(propertyId) {
 
-    text-align: center;
+  const property =
+    appData.properties.find(
+      p => p.id === propertyId
+    );
 
-    border-radius: var(--radius);
+  if (!property) {
+    return;
+  }
 
-    background:
-        radial-gradient(
-            circle at 50% 0%,
-            rgba(155,124,255,0.13),
-            transparent 55%
-        ),
-        rgba(255,255,255,0.035);
 
-    border: 1px solid var(--line);
+  appData.currentPropertyId =
+    propertyId;
+
+
+  const latest =
+    [...(property.scans || [])].sort(
+      (a, b) =>
+        new Date(b.date) - new Date(a.date)
+    )[0];
+
+
+  appData.currentScanId =
+    latest ? latest.id : null;
+
+
+  saveAppData();
+
+  loadProperty(property);
+
+  showScreen("propertyScreen");
+
 }
 
-.profile-avatar {
-    width: 76px;
-    height: 76px;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+function loadProperty(property) {
 
-    margin: 0 auto 14px;
+  const title =
+    document.getElementById("propertyTitle");
 
-    border-radius: 50%;
+  const subtitle =
+    document.getElementById("propertySubtitle");
 
-    background:
-        linear-gradient(
-            135deg,
-            rgba(155,124,255,0.2),
-            rgba(86,230,255,0.1)
-        );
+  const nameDisplay =
+    document.getElementById("propertyNameDisplay");
 
-    border: 1px solid rgba(155,124,255,0.25);
+  const roomCount =
+    document.getElementById("propertyRoomCount");
 
-    font-size: 35px;
-}
+  const objectCount =
+    document.getElementById("propertyObjectCount");
 
-.profile-card h2 {
-    font-size: 16px;
+  const scanCount =
+    document.getElementById("propertyScanCount");
 
-    word-break: break-word;
-}
+  const history =
+    document.getElementById("propertyScanHistory");
 
-.profile-plan {
-    display: inline-block;
+  const aiSummary =
+    document.getElementById("propertyAISummary");
 
-    margin-top: 8px;
+  const maintenance =
+    document.getElementById("maintenanceSummary");
 
-    padding: 6px 9px;
+  const changes =
+    document.getElementById("changeSummary");
 
-    border-radius: 7px;
 
-    background: rgba(255,255,255,0.06);
+  if (title) {
+    title.textContent = property.name;
+  }
 
-    color: var(--muted-light);
+  if (subtitle) {
+    subtitle.textContent =
+      `${property.scans.length} saved scan${property.scans.length === 1 ? "" : "s"}`;
+  }
 
-    font-size: 8px;
+  if (nameDisplay) {
+    nameDisplay.textContent =
+      property.name;
+  }
 
-    font-weight: 900;
 
-    letter-spacing: 1px;
-}
+  const latest =
+    [...property.scans].sort(
+      (a, b) =>
+        new Date(b.date) - new Date(a.date)
+    )[0];
 
-.profile-options {
-    margin-top: 14px;
-}
 
-.profile-option {
-    width: 100%;
+  if (roomCount) {
+    roomCount.textContent =
+      latest ? latest.rooms : "—";
+  }
 
-    display: grid;
+  if (objectCount) {
+    objectCount.textContent =
+      latest ? latest.objects : "—";
+  }
 
-    grid-template-columns: 25px 1fr 20px;
+  if (scanCount) {
+    scanCount.textContent =
+      property.scans.length;
+  }
 
-    align-items: center;
 
-    gap: 10px;
+  if (history) {
 
-    padding: 17px;
+    history.innerHTML =
+      property.scans
+        .slice()
+        .sort(
+          (a, b) =>
+            new Date(b.date) - new Date(a.date)
+        )
+        .map(scan => `
+          <div class="history-item">
 
-    margin-bottom: 7px;
+            <strong>
+              ${formatDate(scan.date)}
+            </strong>
 
-    text-align: left;
+            <span>
+              ${scan.rooms} rooms
+              · ${scan.objects} objects
+              · ${scan.size}
+            </span>
 
-    border-radius: 14px;
+            <button
+              class="text-button"
+              onclick="openScan('${scan.id}', '${property.id}')">
+              Open scan →
+            </button>
 
-    background: rgba(255,255,255,0.035);
+          </div>
+        `)
+        .join("");
 
-    border: 1px solid var(--line);
+  }
 
-    color: var(--muted-light);
 
-    font-size: 13px;
+  if (aiSummary) {
+
+    aiSummary.textContent =
+      latest?.summary ||
+      "Scan your property to generate an AI-powered property summary.";
+
+  }
+
+
+  if (maintenance) {
+
+    maintenance.textContent =
+      latest?.maintenance ||
+      "Maintenance recommendations will appear after your property is scanned.";
+
+  }
+
+
+  if (changes) {
+
+    if (property.scans.length < 2) {
+
+      changes.textContent =
+        "A second scan is required to compare how the property changed over time.";
+
+    } else {
+
+      changes.textContent =
+        "DOLLHOUSE can compare your latest scan with previous scans to identify changes in rooms, objects, and property data.";
+
+    }
+
+  }
+
 }
 
 
 /* =========================================================
-   SETTINGS
-   ========================================================= */
+   OPEN SCAN
+========================================================= */
 
-.settings-card {
-    overflow: hidden;
+function openScan(scanId, propertyId) {
 
-    border-radius: var(--radius);
+  const property =
+    appData.properties.find(
+      p => p.id === propertyId
+    );
 
-    border: 1px solid var(--line);
+  if (!property) {
+    return;
+  }
 
-    background: rgba(255,255,255,0.03);
-}
 
-.setting-row {
-    display: flex;
+  const scan =
+    property.scans.find(
+      s => s.id === scanId
+    );
 
-    align-items: center;
-    justify-content: space-between;
+  if (!scan) {
+    return;
+  }
 
-    gap: 15px;
 
-    padding: 20px;
+  appData.currentPropertyId =
+    propertyId;
 
-    border-bottom: 1px solid var(--line);
-}
+  appData.currentScanId =
+    scanId;
 
-.setting-row:last-child {
-    border-bottom: none;
-}
+  saveAppData();
 
-.setting-row h3 {
-    font-size: 13px;
-}
+  loadModel(scan, property);
 
-.setting-row p {
-    color: var(--muted);
+  showScreen("modelScreen");
 
-    font-size: 10px;
-
-    margin-top: 4px;
-}
-
-.setting-row input {
-    width: 18px;
-    height: 18px;
-
-    accent-color: var(--purple);
-}
-
-.danger-setting h3 {
-    color: #ff8799;
-}
-
-.danger-button {
-    padding: 9px 12px;
-
-    border-radius: 9px;
-
-    background: rgba(255,100,124,0.1);
-
-    border: 1px solid rgba(255,100,124,0.2);
-
-    color: #ff8295;
-
-    font-size: 9px;
-
-    font-weight: 900;
 }
 
 
-/* =========================================================
-   SCANNER
-   ========================================================= */
+function loadModel(scan, property) {
 
-.scanner-screen {
-    overflow: hidden;
+  const title =
+    document.getElementById("modelTitle");
 
-    background:
-        radial-gradient(
-            circle at 50% 50%,
-            rgba(90, 72, 170, 0.12),
-            transparent 45%
-        ),
-        #030306;
-}
+  const date =
+    document.getElementById("modelDate");
 
-.scanner-background {
-    position: absolute;
+  const rooms =
+    document.getElementById("modelRooms");
 
-    inset: 0;
+  const objects =
+    document.getElementById("modelObjects");
 
-    overflow: hidden;
-}
+  const size =
+    document.getElementById("modelSize");
 
-.scanner-grid {
-    position: absolute;
 
-    inset: -30%;
+  if (title) {
+    title.textContent =
+      property.name;
+  }
 
-    opacity: 0.22;
+  if (date) {
+    date.textContent =
+      `Scan date: ${formatDate(scan.date)}`;
+  }
 
-    background-image:
-        linear-gradient(
-            rgba(100, 200, 255, 0.17) 1px,
-            transparent 1px
-        ),
-        linear-gradient(
-            90deg,
-            rgba(100, 200, 255, 0.17) 1px,
-            transparent 1px
-        );
+  if (rooms) {
+    rooms.textContent =
+      scan.rooms;
+  }
 
-    background-size: 55px 55px;
+  if (objects) {
+    objects.textContent =
+      scan.objects;
+  }
 
-    transform:
-        perspective(500px)
-        rotateX(60deg)
-        translateY(25%);
+  if (size) {
+    size.textContent =
+      scan.size || "—";
+  }
 
-    animation: gridMove 8s linear infinite;
-}
-
-
-.laser {
-    position: absolute;
-
-    height: 2px;
-
-    width: 160%;
-
-    left: -30%;
-
-    transform-origin: center;
-
-    background:
-        linear-gradient(
-            90deg,
-            transparent,
-            var(--purple),
-            var(--cyan),
-            var(--pink),
-            transparent
-        );
-
-    filter:
-        blur(0.5px)
-        drop-shadow(0 0 8px rgba(120,180,255,0.8));
-
-    opacity: 0.7;
-
-    animation: laserMove 3.5s ease-in-out infinite;
-}
-
-.laser-1 {
-    top: 20%;
-    transform: rotate(14deg);
-}
-
-.laser-2 {
-    top: 28%;
-    transform: rotate(-18deg);
-    animation-delay: -1s;
-}
-
-.laser-3 {
-    top: 37%;
-    transform: rotate(7deg);
-    animation-delay: -2s;
-}
-
-.laser-4 {
-    top: 46%;
-    transform: rotate(-12deg);
-    animation-delay: -0.5s;
-}
-
-.laser-5 {
-    top: 54%;
-    transform: rotate(18deg);
-    animation-delay: -1.7s;
-}
-
-.laser-6 {
-    top: 63%;
-    transform: rotate(-8deg);
-    animation-delay: -2.3s;
-}
-
-.laser-7 {
-    top: 72%;
-    transform: rotate(13deg);
-    animation-delay: -0.8s;
-}
-
-.laser-8 {
-    top: 80%;
-    transform: rotate(-15deg);
-    animation-delay: -2.7s;
-}
-
-.laser-9 {
-    top: 34%;
-    transform: rotate(30deg);
-    animation-delay: -1.4s;
-}
-
-.laser-10 {
-    top: 68%;
-    transform: rotate(-27deg);
-    animation-delay: -2s;
-}
-
-
-.scanner-interface {
-    position: relative;
-
-    z-index: 2;
-
-    min-height: 100vh;
-
-    display: flex;
-
-    flex-direction: column;
-
-    justify-content: space-between;
-
-    padding:
-        25px
-        max(25px, env(safe-area-inset-right))
-        30px
-        max(25px, env(safe-area-inset-left));
-}
-
-.scanner-top {
-    display: flex;
-
-    align-items: center;
-    justify-content: space-between;
-}
-
-.glass-button {
-    width: 44px;
-    height: 44px;
-
-    border-radius: 13px;
-
-    background: rgba(10,10,18,0.6);
-
-    border: 1px solid rgba(255,255,255,0.15);
-
-    backdrop-filter: blur(15px);
-
-    font-size: 20px;
-}
-
-.scanner-title {
-    font-size: 11px;
-
-    font-weight: 900;
-
-    letter-spacing: 2px;
-}
-
-
-.scanner-main {
-    display: flex;
-
-    align-items: center;
-
-    flex-direction: column;
-
-    text-align: center;
-}
-
-.scanner-ring {
-    width: 210px;
-    height: 210px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 50%;
-
-    background:
-        radial-gradient(
-            circle,
-            rgba(155,124,255,0.12),
-            rgba(5,5,9,0.5) 58%,
-            transparent 59%
-        );
-
-    border:
-        1px solid rgba(155,124,255,0.38);
-
-    box-shadow:
-        0 0 35px rgba(155,124,255,0.12),
-        inset 0 0 35px rgba(86,230,255,0.06);
-
-    animation: scannerPulse 2.5s ease-in-out infinite;
-}
-
-.scan-percentage {
-    font-size: 42px;
-
-    font-weight: 300;
-
-    letter-spacing: -2px;
-}
-
-.scanner-main h2 {
-    margin-top: 25px;
-
-    font-size: 18px;
-}
-
-.scanner-main p {
-    margin-top: 8px;
-
-    color: var(--muted);
-
-    font-size: 12px;
-}
-
-.scan-mode {
-    display: flex;
-
-    gap: 8px;
-
-    margin-top: 18px;
-
-    padding: 6px;
-
-    border-radius: 10px;
-
-    background: rgba(0,0,0,0.35);
-
-    border: 1px solid var(--line);
-
-    font-size: 8px;
-
-    font-weight: 900;
-
-    letter-spacing: 1px;
-
-    color: var(--muted);
-}
-
-.scan-mode span {
-    padding: 6px 9px;
-}
-
-.mode-active {
-    border-radius: 6px;
-
-    background: rgba(155,124,255,0.18);
-
-    color: white;
-}
-
-
-.progress-track {
-    width: 100%;
-
-    height: 4px;
-
-    border-radius: 10px;
-
-    overflow: hidden;
-
-    background: rgba(255,255,255,0.08);
-}
-
-.progress-bar {
-    width: 0%;
-
-    height: 100%;
-
-    background:
-        linear-gradient(
-            90deg,
-            var(--purple),
-            var(--cyan),
-            var(--pink)
-        );
-
-    box-shadow:
-        0 0 12px rgba(100,200,255,0.7);
-
-    transition: width 0.25s linear;
-}
-
-.scanner-stats {
-    display: flex;
-
-    justify-content: space-between;
-
-    margin-top: 13px;
-
-    color: var(--muted-light);
-
-    font-size: 9px;
-
-    font-weight: 800;
-
-    letter-spacing: 0.8px;
 }
 
 
 /* =========================================================
-   MODEL
-   ========================================================= */
+   DELETE SCAN
+========================================================= */
 
-#modelScreen {
-    background:
-        radial-gradient(
-            circle at 50% 40%,
-            rgba(100,90,200,0.14),
-            transparent 42%
-        ),
-        #050509;
+function deleteCurrentScan() {
 
-    padding-bottom: 30px;
-}
+  const property =
+    appData.properties.find(
+      p => p.id === appData.currentPropertyId
+    );
 
-.model-header {
-    display: flex;
+  if (!property) {
+    return;
+  }
 
-    align-items: center;
-    justify-content: space-between;
 
-    gap: 15px;
+  const scanIndex =
+    property.scans.findIndex(
+      s => s.id === appData.currentScanId
+    );
 
-    padding: 20px;
+  if (scanIndex === -1) {
+    return;
+  }
 
-    border-bottom: 1px solid var(--line);
-}
 
-.model-header > div {
-    text-align: center;
-}
+  const confirmed = confirm(
+    "Delete this scan? This cannot be undone."
+  );
 
-.model-header h1 {
-    font-size: 15px;
+  if (!confirmed) {
+    return;
+  }
 
-    letter-spacing: 2px;
-}
 
-.model-header p {
-    color: var(--muted);
+  property.scans.splice(
+    scanIndex,
+    1
+  );
 
-    font-size: 8px;
 
-    margin-top: 3px;
+  if (property.scans.length === 0) {
 
-    letter-spacing: 0.7px;
-}
+    appData.properties =
+      appData.properties.filter(
+        p => p.id !== property.id
+      );
 
-.delete-button {
-    width: 42px;
-    height: 42px;
+    appData.currentPropertyId = null;
+    appData.currentScanId = null;
 
-    border-radius: 12px;
+  } else {
 
-    background: rgba(255,100,124,0.07);
+    appData.currentScanId =
+      property.scans[
+        property.scans.length - 1
+      ].id;
 
-    border: 1px solid rgba(255,100,124,0.13);
+  }
 
-    font-size: 17px;
-}
 
+  saveAppData();
 
-.model-viewer {
-    position: relative;
+  renderDashboard();
+  renderProperties();
 
-    width: min(700px, 100%);
+  showNotification(
+    "Scan deleted."
+  );
 
-    height: 390px;
+  showScreen("scansScreen");
 
-    margin: 20px auto;
-
-    overflow: hidden;
-
-    border-radius: 24px;
-
-    border: 1px solid var(--line);
-
-    background:
-        radial-gradient(
-            circle,
-            rgba(100,120,255,0.08),
-            transparent 50%
-        ),
-        #080810;
-}
-
-.model-glow {
-    position: absolute;
-
-    width: 280px;
-    height: 280px;
-
-    left: 50%;
-    top: 48%;
-
-    transform: translate(-50%, -50%);
-
-    background:
-        linear-gradient(
-            135deg,
-            var(--purple),
-            var(--cyan)
-        );
-
-    filter: blur(90px);
-
-    opacity: 0.11;
-}
-
-.model-room {
-    position: absolute;
-
-    width: 260px;
-    height: 210px;
-
-    left: 50%;
-    top: 48%;
-
-    transform:
-        translate(-50%, -50%)
-        perspective(700px)
-        rotateX(58deg)
-        rotateZ(-8deg);
-
-    transform-style: preserve-3d;
-}
-
-.model-wall {
-    position: absolute;
-
-    border: 1px solid rgba(145,130,255,0.55);
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(155,124,255,0.11),
-            rgba(86,230,255,0.035)
-        );
-
-    box-shadow:
-        0 0 20px rgba(120,100,255,0.08);
-}
-
-.model-back-wall {
-    width: 260px;
-    height: 210px;
-
-    left: 0;
-    top: 0;
-
-    transform: translateZ(-35px);
-}
-
-.model-left-wall {
-    width: 210px;
-    height: 210px;
-
-    left: -105px;
-    top: 0;
-
-    transform:
-        rotateY(90deg)
-        translateZ(130px);
-}
-
-.model-floor {
-    position: absolute;
-
-    width: 260px;
-    height: 210px;
-
-    left: 0;
-    top: 0;
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(120,130,180,0.07),
-            rgba(255,255,255,0.025)
-        );
-
-    border: 1px solid rgba(145,130,255,0.4);
-
-    transform: translateZ(0);
-}
-
-.model-ceiling {
-    position: absolute;
-
-    width: 260px;
-    height: 210px;
-
-    left: 0;
-    top: -210px;
-
-    border: 1px solid rgba(145,130,255,0.16);
-
-    transform:
-        rotateX(90deg)
-        translateZ(210px);
-
-    opacity: 0.2;
-}
-
-.model-door {
-    position: absolute;
-
-    width: 38px;
-    height: 75px;
-
-    left: 20px;
-    top: 75px;
-
-    border: 1px solid rgba(86,230,255,0.55);
-
-    background: rgba(86,230,255,0.06);
-}
-
-.model-window {
-    position: absolute;
-
-    width: 62px;
-    height: 42px;
-
-    right: 28px;
-    top: 40px;
-
-    border: 1px solid rgba(86,230,255,0.55);
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(86,230,255,0.12),
-            rgba(155,124,255,0.06)
-        );
-}
-
-.model-furniture {
-    position: absolute;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    color: var(--cyan);
-
-    border: 1px solid rgba(155,124,255,0.45);
-
-    background: rgba(155,124,255,0.08);
-
-    box-shadow:
-        0 0 15px rgba(155,124,255,0.1);
-}
-
-.furniture-1 {
-    width: 75px;
-    height: 40px;
-
-    left: 85px;
-    top: 115px;
-}
-
-.furniture-2 {
-    width: 38px;
-    height: 38px;
-
-    right: 35px;
-    bottom: 30px;
-}
-
-.furniture-3 {
-    width: 30px;
-    height: 30px;
-
-    left: 40px;
-    bottom: 30px;
-}
-
-.model-overlay {
-    position: absolute;
-
-    left: 18px;
-    right: 18px;
-    bottom: 16px;
-
-    display: flex;
-    justify-content: space-between;
-
-    color: var(--muted);
-
-    font-size: 8px;
-
-    font-weight: 900;
-
-    letter-spacing: 1px;
-}
-
-.model-information {
-    width: min(600px, calc(100% - 40px));
-
-    margin: 0 auto;
-}
-
-.success-label {
-    color: var(--cyan);
-
-    font-size: 9px;
-
-    font-weight: 900;
-
-    letter-spacing: 1.1px;
-}
-
-.model-information h2 {
-    margin-top: 7px;
-
-    font-size: 22px;
-}
-
-.model-stats {
-    display: grid;
-
-    grid-template-columns: repeat(3, 1fr);
-
-    gap: 8px;
-
-    margin: 20px 0;
-}
-
-.model-stat {
-    padding: 15px;
-
-    text-align: center;
-
-    border-radius: 13px;
-
-    background: rgba(255,255,255,0.035);
-
-    border: 1px solid var(--line);
-}
-
-.model-stat strong {
-    display: block;
-
-    font-size: 19px;
-}
-
-.model-stat span {
-    display: block;
-
-    color: var(--muted);
-
-    font-size: 8px;
-
-    font-weight: 800;
-
-    letter-spacing: 0.8px;
-
-    margin-top: 4px;
 }
 
 
 /* =========================================================
-   AI
-   ========================================================= */
+   SAVE SCAN
+========================================================= */
 
-.ai-page {
-    width: min(700px, 100%);
+function saveScan() {
 
-    height: 100vh;
+  saveAppData();
 
-    margin: 0 auto;
+  showNotification(
+    "Scan saved successfully."
+  );
 
-    display: flex;
-
-    flex-direction: column;
-}
-
-.ai-header {
-    display: flex;
-
-    align-items: center;
-
-    gap: 14px;
-
-    padding: 22px 20px;
-
-    border-bottom: 1px solid var(--line);
-}
-
-.ai-title {
-    display: flex;
-
-    align-items: center;
-
-    gap: 11px;
-}
-
-.ai-icon-small {
-    width: 40px;
-    height: 40px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 12px;
-
-    background: rgba(155,124,255,0.12);
-
-    color: var(--purple);
-
-    font-size: 20px;
-}
-
-.ai-title h1 {
-    font-size: 15px;
-
-    letter-spacing: 1.5px;
-}
-
-.ai-title p {
-    color: var(--muted);
-
-    font-size: 10px;
-
-    margin-top: 3px;
-}
-
-.chat-messages {
-    flex: 1;
-
-    overflow-y: auto;
-
-    padding: 22px 20px;
-}
-
-.ai-message,
-.user-message {
-    max-width: 88%;
-
-    padding: 14px 16px;
-
-    border-radius: 16px;
-
-    margin-bottom: 12px;
-
-    font-size: 13px;
-
-    line-height: 1.6;
-}
-
-.ai-message {
-    display: flex;
-
-    gap: 10px;
-
-    background: rgba(155,124,255,0.075);
-
-    border: 1px solid rgba(155,124,255,0.13);
-}
-
-.message-icon {
-    color: var(--purple);
-
-    font-weight: 900;
-}
-
-.ai-message p {
-    flex: 1;
-}
-
-.user-message {
-    margin-left: auto;
-
-    background: rgba(255,255,255,0.07);
-
-    border: 1px solid var(--line);
-}
-
-.chat-input-container {
-    display: flex;
-
-    gap: 9px;
-
-    padding:
-        14px
-        max(20px, env(safe-area-inset-right))
-        max(20px, env(safe-area-inset-bottom))
-        max(20px, env(safe-area-inset-left));
-
-    border-top: 1px solid var(--line);
-
-    background: rgba(5,5,9,0.85);
-
-    backdrop-filter: blur(20px);
-}
-
-.chat-input-container input {
-    flex: 1;
-
-    height: 50px;
-
-    padding: 0 15px;
-
-    border-radius: 14px;
-
-    background: rgba(255,255,255,0.055);
-
-    border: 1px solid var(--line);
-
-    color: white;
-}
-
-.chat-input-container button {
-    width: 50px;
-
-    border-radius: 14px;
-
-    background:
-        linear-gradient(
-            135deg,
-            var(--purple),
-            #6f8dff
-        );
-
-    font-size: 21px;
 }
 
 
 /* =========================================================
-   PREMIUM
-   ========================================================= */
+   SCAN HELP
+========================================================= */
 
-.premium-page {
-    width: min(680px, 100%);
+function showScanHelp() {
 
-    margin: 0 auto;
+  const modal =
+    document.getElementById("scanHelpModal");
 
-    padding:
-        25px
-        max(20px, env(safe-area-inset-right))
-        45px
-        max(20px, env(safe-area-inset-left));
-}
+  if (modal) {
+    modal.classList.remove("hidden");
+  }
 
-.premium-hero {
-    text-align: center;
-
-    padding: 25px 0 30px;
-}
-
-.premium-icon {
-    width: 70px;
-    height: 70px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    margin: 0 auto 15px;
-
-    border-radius: 22px;
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(155,124,255,0.2),
-            rgba(86,230,255,0.09)
-        );
-
-    border: 1px solid rgba(155,124,255,0.25);
-
-    color: white;
-
-    font-size: 31px;
-
-    box-shadow:
-        0 0 45px rgba(155,124,255,0.13);
-}
-
-.premium-label {
-    color: var(--purple);
-
-    font-size: 9px;
-
-    font-weight: 900;
-
-    letter-spacing: 2px;
-}
-
-.premium-hero h1 {
-    margin-top: 5px;
-
-    font-size: 31px;
-
-    letter-spacing: 2px;
-}
-
-.premium-hero p {
-    color: var(--muted);
-
-    font-size: 12px;
-
-    margin-top: 8px;
-}
-
-.premium-feature-list {
-    display: grid;
-
-    grid-template-columns: repeat(2, 1fr);
-
-    gap: 8px;
-
-    margin-bottom: 22px;
-}
-
-.premium-feature {
-    display: flex;
-
-    align-items: center;
-
-    gap: 10px;
-
-    padding: 13px;
-
-    border-radius: 12px;
-
-    background: rgba(255,255,255,0.035);
-
-    border: 1px solid var(--line);
-}
-
-.premium-feature span {
-    color: var(--cyan);
-
-    font-size: 12px;
-
-    font-weight: 900;
-}
-
-.premium-feature p {
-    color: var(--muted-light);
-
-    font-size: 10px;
-
-    line-height: 1.4;
 }
 
 
-.subscription-options {
-    display: grid;
+function closeScanHelp() {
 
-    gap: 9px;
+  const modal =
+    document.getElementById("scanHelpModal");
 
-    margin-bottom: 14px;
+  if (modal) {
+    modal.classList.add("hidden");
+  }
+
 }
 
-.subscription-card {
-    position: relative;
 
-    width: 100%;
+function cancelScan() {
 
-    display: flex;
+  clearInterval(scanTimer);
 
-    align-items: center;
-    justify-content: space-between;
+  scanProgressValue = 0;
 
-    padding: 17px;
+  showScreen("dashboardScreen");
 
-    border-radius: 15px;
+  showNotification(
+    "Scan cancelled."
+  );
 
-    background: rgba(255,255,255,0.035);
-
-    border: 1px solid var(--line);
-
-    text-align: left;
-
-    transition: 0.2s ease;
-}
-
-.subscription-card:hover {
-    border-color: rgba(155,124,255,0.4);
-}
-
-.subscription-card.selected {
-    background: rgba(155,124,255,0.1);
-
-    border-color: rgba(155,124,255,0.55);
-
-    box-shadow:
-        0 0 25px rgba(155,124,255,0.08);
-}
-
-.subscription-info span {
-    display: block;
-
-    color: var(--muted);
-
-    font-size: 8px;
-
-    font-weight: 900;
-
-    letter-spacing: 1px;
-}
-
-.subscription-info strong {
-    display: inline-block;
-
-    margin-top: 4px;
-
-    font-size: 21px;
-}
-
-.subscription-info small {
-    color: var(--muted);
-
-    font-size: 9px;
-
-    margin-left: 4px;
-}
-
-.subscription-radio {
-    color: var(--muted);
-
-    font-size: 23px;
-}
-
-.subscription-card.selected .subscription-radio {
-    color: var(--purple);
-}
-
-.yearly-plan {
-    padding-top: 24px;
-}
-
-.best-value {
-    position: absolute;
-
-    top: 0;
-    left: 17px;
-
-    padding: 5px 8px;
-
-    border-radius: 0 0 7px 7px;
-
-    background:
-        linear-gradient(
-            90deg,
-            var(--purple),
-            var(--cyan)
-        );
-
-    color: #08080d;
-
-    font-size: 7px;
-
-    font-weight: 900;
-
-    letter-spacing: 0.7px;
-}
-
-.subscription-note {
-    margin-top: 13px;
-
-    text-align: center;
-
-    color: #656572;
-
-    font-size: 9px;
-
-    line-height: 1.5;
 }
 
 
 /* =========================================================
-   FLOATING AI
-   ========================================================= */
+   TERMS
+========================================================= */
 
-.ai-floating-button {
-    position: fixed;
+function showTerms() {
 
-    right: 22px;
-    bottom: 22px;
+  const modal =
+    document.getElementById("termsModal");
 
-    width: 57px;
-    height: 57px;
+  if (modal) {
+    modal.classList.remove("hidden");
+  }
 
-    z-index: 30;
+}
 
-    border-radius: 50%;
 
-    background:
-        linear-gradient(
-            135deg,
-            var(--purple),
-            var(--blue)
-        );
+function closeTerms() {
 
-    color: white;
+  const modal =
+    document.getElementById("termsModal");
 
-    font-size: 23px;
+  if (modal) {
+    modal.classList.add("hidden");
+  }
 
-    box-shadow:
-        0 10px 35px rgba(105,90,255,0.4);
-
-    animation: aiFloat 3s ease-in-out infinite;
 }
 
 
 /* =========================================================
-   ANIMATIONS
-   ========================================================= */
+   AI ASSISTANT
+========================================================= */
 
-@keyframes logoShift {
-    0% {
-        background-position: 0% center;
-    }
+function sendMessage() {
 
-    100% {
-        background-position: 250% center;
-    }
+  const input =
+    document.getElementById("chatInput");
+
+  const messages =
+    document.getElementById("chatMessages");
+
+
+  if (!input || !messages) {
+    return;
+  }
+
+
+  const text =
+    input.value.trim();
+
+
+  if (!text) {
+    return;
+  }
+
+
+  addChatMessage(
+    text,
+    "user"
+  );
+
+
+  input.value = "";
+
+
+  setTimeout(() => {
+
+    const response =
+      generateAIResponse(text);
+
+    addChatMessage(
+      response,
+      "ai"
+    );
+
+  }, 650);
+
 }
 
-@keyframes glowPulse {
-    0%,
-    100% {
-        opacity: 0.18;
-        transform: scale(0.95);
-    }
 
-    50% {
-        opacity: 0.34;
-        transform: scale(1.08);
-    }
+function handleChatKey(event) {
+
+  if (
+    event.key === "Enter" &&
+    !event.shiftKey
+  ) {
+
+    event.preventDefault();
+
+    sendMessage();
+
+  }
+
 }
 
-@keyframes gridMove {
-    from {
-        transform:
-            perspective(500px)
-            rotateX(60deg)
-            translateY(0);
-    }
 
-    to {
-        transform:
-            perspective(500px)
-            rotateX(60deg)
-            translateY(55px);
-    }
+function useSuggestion(text) {
+
+  const input =
+    document.getElementById("chatInput");
+
+  if (!input) {
+    return;
+  }
+
+  input.value = text;
+
+  sendMessage();
+
 }
 
-@keyframes laserMove {
-    0%,
-    100% {
-        opacity: 0.25;
-    }
 
-    50% {
-        opacity: 0.9;
-    }
+function addChatMessage(text, type) {
+
+  const messages =
+    document.getElementById("chatMessages");
+
+  if (!messages) {
+    return;
+  }
+
+
+  const message =
+    document.createElement("div");
+
+  message.className =
+    "chat-message " +
+    (type === "user"
+      ? "user-message"
+      : "ai-message");
+
+
+  if (type === "user") {
+
+    message.innerHTML = `
+      <div class="message-content">
+        <p>${escapeHTML(text)}</p>
+      </div>
+    `;
+
+  } else {
+
+    message.innerHTML = `
+      <div class="chat-avatar">
+        AI
+      </div>
+
+      <div class="message-content">
+
+        <strong>
+          DOLLHOUSE AI
+        </strong>
+
+        <p>
+          ${escapeHTML(text)}
+        </p>
+
+      </div>
+    `;
+
+  }
+
+
+  messages.appendChild(message);
+
+  messages.scrollTop =
+    messages.scrollHeight;
+
 }
 
-@keyframes scannerPulse {
-    0%,
-    100% {
-        transform: scale(0.98);
-        box-shadow:
-            0 0 30px rgba(155,124,255,0.1);
-    }
 
-    50% {
-        transform: scale(1.02);
-        box-shadow:
-            0 0 55px rgba(86,180,255,0.18);
-    }
-}
+function generateAIResponse(text) {
 
-@keyframes aiFloat {
-    0%,
-    100% {
-        transform: translateY(0);
-    }
+  const lower =
+    text.toLowerCase();
 
-    50% {
-        transform: translateY(-5px);
-    }
+
+  if (
+    lower.includes("summary") ||
+    lower.includes("summarize")
+  ) {
+
+    return "Based on the available prototype scan data, your property can be organized by rooms, detected objects, property size, scan dates, and historical changes. A future native version can use real LiDAR and AI analysis for substantially more detailed results.";
+
+  }
+
+
+  if (
+    lower.includes("maintenance") ||
+    lower.includes("fix") ||
+    lower.includes("inspect")
+  ) {
+
+    return "I can help organize areas that may need attention, but a scan alone cannot confirm a real defect. For important structural, electrical, plumbing, or safety concerns, a qualified professional should inspect the property.";
+
+  }
+
+
+  if (
+    lower.includes("changed") ||
+    lower.includes("change") ||
+    lower.includes("compare")
+  ) {
+
+    return "DOLLHOUSE can compare saved scans from different dates. The prototype tracks room counts, object counts, property size, and scan dates. A future native version can add deeper visual and spatial change detection.";
+
+  }
+
+
+  if (
+    lower.includes("room")
+  ) {
+
+    return "Your saved property data can be organized room by room. The native version is intended to use Apple's LiDAR and RoomPlan technologies to capture spatial information more accurately.";
+
+  }
+
+
+  if (
+    lower.includes("scan")
+  ) {
+
+    return "The current GitHub prototype simulates the scanning process. It does not have real LiDAR access. The eventual iPad version can use compatible Apple LiDAR hardware for actual spatial scanning.";
+
+  }
+
+
+  return "I can help you understand your saved property data, review scan information, compare historical scans, and organize maintenance questions. What would you like to know?";
+
 }
 
 
 /* =========================================================
-   RESPONSIVE
-   ========================================================= */
+   SUBSCRIPTIONS
+========================================================= */
 
-@media (min-width: 700px) {
+function selectSubscription(plan) {
 
-    .dashboard-content {
-        padding-top: 35px;
-    }
+  selectedSubscription =
+    plan;
 
-    .welcome-container {
-        padding-top: 10px;
-    }
 
-    .welcome-features {
-        gap: 16px;
-    }
+  document
+    .querySelectorAll(".subscription-card")
+    .forEach(card => {
+      card.classList.remove("selected");
+    });
 
-    .feature-card {
-        padding: 20px;
-    }
 
-    .model-viewer {
-        height: 470px;
-    }
+  const selected =
+    document.getElementById(
+      plan + "Plan"
+    );
+
+  if (selected) {
+    selected.classList.add("selected");
+  }
+
+
+  const button =
+    document.getElementById(
+      "subscribeButton"
+    );
+
+  if (!button) {
+    return;
+  }
+
+
+  const labels = {
+
+    weekly:
+      "Continue with Weekly",
+
+    monthly:
+      "Continue with Monthly",
+
+    yearly:
+      "Continue with Yearly"
+
+  };
+
+
+  button.textContent =
+    labels[plan] ||
+    "Continue";
+
 }
 
 
-@media (max-width: 520px) {
+function activatePremium() {
 
-    .premium-feature-list {
-        grid-template-columns: 1fr;
-    }
+  const planNames = {
 
-    .top-bar {
-        padding-left: 16px;
-        padding-right: 16px;
-    }
+    weekly: "WEEKLY",
 
-    .dashboard-content {
-        padding-left: 16px;
-        padding-right: 16px;
-    }
+    monthly: "MONTHLY",
 
-    .premium-page {
-        padding-left: 16px;
-        padding-right: 16px;
-    }
+    yearly: "YEARLY"
 
-    .model-viewer {
-        height: 330px;
+  };
 
-        border-radius: 18px;
-    }
 
-    .model-room {
-        transform:
-            translate(-50%, -50%)
-            perspective(700px)
-            rotateX(58deg)
-            rotateZ(-8deg)
-            scale(0.82);
-    }
+  appData.plan =
+    planNames[selectedSubscription] ||
+    "PREMIUM";
+
+
+  saveAppData();
+
+  updateUserInterface();
+
+  showNotification(
+    `Premium ${appData.plan.toLowerCase()} plan activated in prototype.`
+  );
+
 }
 
 
-@media (prefers-reduced-motion: reduce) {
+/* =========================================================
+   RESET DATA
+========================================================= */
 
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        scroll-behavior: auto !important;
-    }
+function resetAppData() {
+
+  const confirmed = confirm(
+    "This will delete your local DOLLHOUSE account, properties, and scans. Continue?"
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+
+  localStorage.removeItem(
+    STORAGE_KEY
+  );
+
+
+  appData = {
+
+    account: null,
+
+    plan: "FREE",
+
+    properties: [],
+
+    currentPropertyId: null,
+
+    currentScanId: null
+
+  };
+
+
+  clearInterval(scanTimer);
+
+  showNotification(
+    "App data has been reset."
+  );
+
+
+  setTimeout(() => {
+
+    location.reload();
+
+  }, 600);
+
 }
+
+
+/* =========================================================
+   NOTIFICATIONS
+========================================================= */
+
+let notificationTimer = null;
+
+
+function showNotification(message) {
+
+  const notification =
+    document.getElementById("notification");
+
+  const messageElement =
+    document.getElementById(
+      "notificationMessage"
+    );
+
+
+  if (!notification || !messageElement) {
+    return;
+  }
+
+
+  messageElement.textContent =
+    message;
+
+
+  notification.classList.add(
+    "show"
+  );
+
+
+  clearTimeout(
+    notificationTimer
+  );
+
+
+  notificationTimer =
+    setTimeout(() => {
+
+      notification.classList.remove(
+        "show"
+      );
+
+    }, 3000);
+
+}
+
+
+/* =========================================================
+   DATE FORMAT
+========================================================= */
+
+function formatDate(dateString) {
+
+  if (!dateString) {
+    return "—";
+  }
+
+
+  const date =
+    new Date(dateString);
+
+
+  if (Number.isNaN(date.getTime())) {
+    return "—";
+  }
+
+
+  return date.toLocaleDateString(
+    "en-US",
+    {
+      month: "short",
+      day: "numeric",
+      year: "numeric"
+    }
+  );
+
+}
+
+
+/* =========================================================
+   SECURITY / TEXT CLEANING
+========================================================= */
+
+function escapeHTML(value) {
+
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
+
+
+/* =========================================================
+   KEYBOARD SHORTCUTS
+========================================================= */
+
+function setupKeyboardShortcuts() {
+
+  document.addEventListener(
+    "keydown",
+    event => {
+
+      if (event.key === "Escape") {
+
+        closeMenu();
+        closeTerms();
+        closeScanHelp();
+
+      }
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   GLOBAL ERROR PROTECTION
+========================================================= */
+
+window.addEventListener(
+  "error",
+  event => {
+
+    console.error(
+      "DOLLHOUSE error:",
+      event.error
+    );
+
+  }
+);
