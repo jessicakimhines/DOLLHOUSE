@@ -1,47 +1,740 @@
 /* =========================================================
-   DOLLHOUSE — Main App Script
+   DOLLHOUSE
+   Main Stylesheet
    ========================================================= */
 
-let scanTimer = null;
-let currentScan = null;
-let currentPropertyId = null;
-let currentViewingScan = null;
-let lastModelSource = "dashboardScreen";
-let selectedSubscription = null;
+:root {
+    --bg: #050509;
+    --bg-soft: #0a0a11;
+    --panel: rgba(18, 18, 28, 0.82);
+    --panel-solid: #11111a;
+    --panel-light: rgba(255, 255, 255, 0.055);
+
+    --text: #f5f5f7;
+    --muted: #9696a5;
+    --muted-light: #b9b9c5;
+
+    --line: rgba(255, 255, 255, 0.09);
+    --line-bright: rgba(255, 255, 255, 0.16);
+
+    --purple: #9b7cff;
+    --blue: #6ca8ff;
+    --cyan: #56e6ff;
+    --pink: #ff72d2;
+
+    --danger: #ff647c;
+
+    --radius: 22px;
+    --radius-small: 14px;
+
+    --shadow: 0 20px 60px rgba(0, 0, 0, 0.42);
+}
 
 
 /* =========================================================
-   BASIC SCREEN NAVIGATION
+   RESET
    ========================================================= */
 
-function showScreen(screenId) {
-    document.querySelectorAll(".screen").forEach(screen => {
-        screen.classList.remove("active");
-    });
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-    const screen = document.getElementById(screenId);
+html {
+    width: 100%;
+    min-height: 100%;
+    background: var(--bg);
+}
 
-    if (screen) {
-        screen.classList.add("active");
-    }
+body {
+    width: 100%;
+    min-height: 100vh;
 
-    closeMenu();
+    background:
+        radial-gradient(
+            circle at 50% -10%,
+            rgba(126, 92, 255, 0.13),
+            transparent 38%
+        ),
+        radial-gradient(
+            circle at 100% 50%,
+            rgba(74, 171, 255, 0.055),
+            transparent 35%
+        ),
+        var(--bg);
 
-    if (screenId === "dashboardScreen") {
-        displaySavedScans();
-    }
+    color: var(--text);
 
-    if (screenId === "scansScreen") {
-        renderAllProperties();
-    }
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "SF Pro Display",
+        "SF Pro Text",
+        Inter,
+        Arial,
+        sans-serif;
 
-    if (screenId === "profileScreen") {
-        updateProfile();
-    }
+    -webkit-font-smoothing: antialiased;
+}
 
-    if (screenId === "propertyScreen") {
-        renderPropertyDetails();
-    }
+button,
+input {
+    font: inherit;
+}
+
+button {
+    color: inherit;
+    border: none;
+    cursor: pointer;
+}
+
+input {
+    outline: none;
+}
+
+
+/* =========================================================
+   APP
+   ========================================================= */
+
+#app {
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+
+/* =========================================================
+   SCREENS
+   ========================================================= */
+
+.screen {
+    display: none;
+
+    width: 100%;
+    min-height: 100vh;
+
+    position: relative;
+}
+
+.screen.active {
+    display: block;
+}
+
+
+/* =========================================================
+   COMMON
+   ========================================================= */
+
+.primary-button {
+    width: 100%;
+
+    min-height: 56px;
+
+    border-radius: 16px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--purple),
+            #6f8dff
+        );
+
+    color: white;
+
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+
+    box-shadow:
+        0 12px 35px rgba(125, 102, 255, 0.28);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        opacity 0.2s ease;
+}
+
+.primary-button:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 16px 42px rgba(125, 102, 255, 0.38);
+}
+
+.primary-button:active {
+    transform: scale(0.98);
+}
+
+
+.back-button {
+    width: 44px;
+    height: 44px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 13px;
+
+    background: rgba(255, 255, 255, 0.055);
+
+    border: 1px solid var(--line);
+
+    color: white;
+
+    font-size: 23px;
+
+    transition: 0.2s ease;
+}
+
+.back-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+
+.secondary-button {
+    padding: 11px 17px;
+
+    border-radius: 11px;
+
+    background: rgba(255, 255, 255, 0.07);
+
+    border: 1px solid var(--line);
+
+    color: white;
+
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+}
+
+
+.text-button {
+    background: transparent;
+
+    color: var(--purple);
+
+    font-size: 11px;
+    font-weight: 800;
+
+    letter-spacing: 0.8px;
+}
+
+
+.icon-button {
+    width: 44px;
+    height: 44px;
+
+    border-radius: 13px;
+
+    background: rgba(255, 255, 255, 0.055);
+
+    border: 1px solid var(--line);
+
+    font-size: 22px;
+}
+
+
+/* =========================================================
+   WELCOME
+   ========================================================= */
+
+#welcomeScreen {
+    display: none;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 40px 20px;
+}
+
+#welcomeScreen.active {
+    display: flex;
+}
+
+.welcome-container {
+    width: min(560px, 100%);
+
+    text-align: center;
+}
+
+
+.logo-area {
+    position: relative;
+
+    display: inline-block;
+
+    margin-bottom: 12px;
+}
+
+.main-logo {
+    position: relative;
+    z-index: 2;
+
+    font-size: clamp(38px, 9vw, 64px);
+
+    font-weight: 900;
+
+    letter-spacing: 5px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #ffffff,
+            #b8a5ff,
+            #ffffff,
+            #79dfff,
+            #ffffff
+        );
+
+    background-size: 250% auto;
+
+    -webkit-background-clip: text;
+    background-clip: text;
+
+    color: transparent;
+
+    animation: logoShift 7s linear infinite;
+}
+
+.logo-glow {
+    position: absolute;
+
+    width: 80%;
+    height: 80%;
+
+    left: 10%;
+    top: 10%;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--purple),
+            var(--cyan),
+            var(--pink)
+        );
+
+    filter: blur(35px);
+
+    opacity: 0.25;
+
+    animation: glowPulse 3s ease-in-out infinite;
+}
+
+.tagline {
+    color: var(--muted-light);
+
+    font-size: 15px;
+
+    letter-spacing: 1.5px;
+
+    margin-bottom: 42px;
+}
+
+
+.welcome-features {
+    display: grid;
+
+    gap: 13px;
+
+    text-align: left;
+
+    margin-bottom: 28px;
+}
+
+.feature-card {
+    display: flex;
+    align-items: center;
+
+    gap: 16px;
+
+    padding: 18px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,0.065),
+            rgba(255,255,255,0.025)
+        );
+
+    border: 1px solid var(--line);
+
+    border-radius: var(--radius-small);
+
+    backdrop-filter: blur(20px);
+
+    box-shadow: var(--shadow);
+}
+
+.feature-icon {
+    flex: 0 0 48px;
+
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 15px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(155,124,255,0.18),
+            rgba(86,230,255,0.1)
+        );
+
+    border: 1px solid rgba(155,124,255,0.22);
+
+    color: white;
+
+    font-size: 23px;
+}
+
+.feature-card h3 {
+    font-size: 14px;
+
+    margin-bottom: 5px;
+}
+
+.feature-card p {
+    color: var(--muted);
+
+    font-size: 12px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   ACCOUNT
+   ========================================================= */
+
+#accountScreen,
+#termsScreen {
+    padding: 30px 20px;
+}
+
+.account-container,
+.page-container {
+    width: min(620px, 100%);
+
+    margin: 0 auto;
+}
+
+.account-container {
+    padding-top: 15px;
+}
+
+.account-logo {
+    margin-top: 38px;
+
+    color: var(--muted);
+
+    font-size: 11px;
+    font-weight: 900;
+
+    letter-spacing: 3px;
+}
+
+.account-container h1 {
+    margin-top: 15px;
+
+    font-size: 34px;
+
+    letter-spacing: -1px;
+}
+
+.screen-subtitle {
+    margin-top: 10px;
+
+    color: var(--muted);
+
+    font-size: 14px;
+
+    line-height: 1.6;
+}
+
+
+.form-group {
+    margin-top: 26px;
+}
+
+.form-group label {
+    display: block;
+
+    margin-bottom: 9px;
+
+    color: var(--muted-light);
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+.form-group input {
+    width: 100%;
+
+    height: 54px;
+
+    padding: 0 16px;
+
+    border-radius: 14px;
+
+    border: 1px solid var(--line);
+
+    background: rgba(255, 255, 255, 0.055);
+
+    color: white;
+
+    font-size: 15px;
+
+    transition: 0.2s ease;
+}
+
+.form-group input:focus {
+    border-color: rgba(155, 124, 255, 0.7);
+
+    box-shadow:
+        0 0 0 4px rgba(155, 124, 255, 0.09);
+}
+
+.form-group input::placeholder {
+    color: #666675;
+}
+
+.input-note,
+.account-note {
+    color: var(--muted);
+
+    font-size: 11px;
+
+    line-height: 1.5;
+}
+
+.input-note {
+    margin-top: 8px;
+}
+
+
+.terms-container {
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: 10px;
+
+    margin: 25px 0;
+
+    color: var(--muted-light);
+
+    font-size: 12px;
+
+    line-height: 1.5;
+}
+
+.terms-container input {
+    width: 17px;
+    height: 17px;
+
+    margin-top: 1px;
+
+    accent-color: var(--purple);
+
+    flex-shrink: 0;
+}
+
+.inline-link {
+    background: none;
+
+    color: var(--purple);
+
+    font-weight: 700;
+
+    text-decoration: underline;
+}
+
+.account-note {
+    text-align: center;
+
+    margin-top: 15px;
+}
+
+
+/* =========================================================
+   PAGE HEADER
+   ========================================================= */
+
+.page-header {
+    display: flex;
+    align-items: center;
+
+    gap: 15px;
+
+    padding: 28px 0 24px;
+}
+
+.page-header > div {
+    flex: 1;
+}
+
+.page-header h1 {
+    font-size: 27px;
+
+    letter-spacing: -0.7px;
+}
+
+.page-header p {
+    color: var(--muted);
+
+    font-size: 12px;
+
+    margin-top: 4px;
+}
+
+
+/* =========================================================
+   CONTENT CARD
+   ========================================================= */
+
+.content-card {
+    padding: 24px;
+
+    background: var(--panel);
+
+    border: 1px solid var(--line);
+
+    border-radius: var(--radius);
+
+    box-shadow: var(--shadow);
+}
+
+.content-card h2 {
+    margin-bottom: 14px;
+}
+
+.content-card h3 {
+    margin-top: 24px;
+    margin-bottom: 8px;
+
+    font-size: 15px;
+}
+
+.content-card p {
+    color: var(--muted-light);
+
+    font-size: 13px;
+
+    line-height: 1.7;
+
+    margin-bottom: 10px;
+}
+
+.content-card .primary-button {
+    margin-top: 22px;
+}
+
+
+/* =========================================================
+   DASHBOARD
+   ========================================================= */
+
+#dashboardScreen {
+    padding-bottom: 50px;
+}
+
+.top-bar {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 15px;
+
+    padding:
+        22px
+        max(22px, env(safe-area-inset-right))
+        20px
+        max(22px, env(safe-area-inset-left));
+
+    border-bottom: 1px solid var(--line);
+
+    background: rgba(5, 5, 9, 0.7);
+
+    backdrop-filter: blur(25px);
+
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+
+.top-bar-left {
+    display: flex;
+    align-items: center;
+
+    gap: 13px;
+}
+
+.menu-button {
+    width: 43px;
+    height: 43px;
+
+    border-radius: 12px;
+
+    background: rgba(255, 255, 255, 0.06);
+
+    border: 1px solid var(--line);
+
+    font-size: 20px;
+}
+
+.brand-small h1 {
+    font-size: 17px;
+
+    letter-spacing: 2px;
+}
+
+.brand-small p {
+    color: var(--muted);
+
+    font-size: 10px;
+
+    margin-top: 3px;
+}
+
+.premium-button {
+    padding: 10px 13px;
+
+    border-radius: 11px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(155,124,255,0.18),
+            rgba(86,230,255,0.08)
+        );
+
+    border: 1px solid rgba(155,124,255,0.28);
+
+    color: #dcd5ff;
+
+    font-size: 10px;
+
+    font-weight: 900;
+
+    letter-spacing: 0.7px;
+}
+
+
+.dashboard-content {
+    width: min(760px, 100%);
+
+    margin: 0 auto;
+
+    padding: 24px 20px;
 }
 
 
@@ -49,1085 +742,589 @@ function showScreen(screenId) {
    SIDE MENU
    ========================================================= */
 
-function toggleMenu() {
-    const menu = document.getElementById("mainMenu");
+.side-menu {
+    position: fixed;
 
-    if (menu) {
-        menu.classList.toggle("open");
-    }
-}
+    left: 0;
+    top: 0;
 
-function closeMenu() {
-    const menu = document.getElementById("mainMenu");
+    width: min(330px, 88vw);
+    height: 100vh;
 
-    if (menu) {
-        menu.classList.remove("open");
-    }
-}
+    z-index: 100;
 
-function navigateFromMenu(screenId) {
-    showScreen(screenId);
-}
+    padding: 22px;
 
-
-/* =========================================================
-   ACCOUNT CREATION
-   ========================================================= */
-
-function createAccount() {
-    const emailInput = document.getElementById("email");
-    const passwordInput = document.getElementById("password");
-    const termsInput = document.getElementById("terms");
-
-    const email = emailInput ? emailInput.value.trim() : "";
-    const password = passwordInput ? passwordInput.value : "";
-    const termsAccepted = termsInput ? termsInput.checked : false;
-
-    if (!email || !email.includes("@")) {
-        alert("Please enter a valid email address.");
-        return;
-    }
-
-    if (password.length < 8) {
-        alert("Your password must be at least 8 characters.");
-        return;
-    }
-
-    if (!termsAccepted) {
-        alert("Please accept the Terms & Conditions.");
-        return;
-    }
-
-    localStorage.setItem("dollhouseSignedIn", "true");
-    localStorage.setItem("dollhouseEmail", email);
-
-    updateProfile();
-    showScreen("dashboardScreen");
-}
-
-
-/* =========================================================
-   LOGIN / LOGOUT
-   ========================================================= */
-
-function logout() {
-    localStorage.removeItem("dollhouseSignedIn");
-    localStorage.removeItem("dollhouseEmail");
-
-    currentPropertyId = null;
-    currentScan = null;
-
-    showScreen("welcomeScreen");
-}
-
-
-/* =========================================================
-   PROPERTY DATA
-   ========================================================= */
-
-function getProperties() {
-    const saved = localStorage.getItem("dollhouseProperties");
-
-    if (saved) {
-        try {
-            return JSON.parse(saved);
-        } catch (error) {
-            return [];
-        }
-    }
-
-    /* -----------------------------------------
-       Migrate older prototype scan data
-       ----------------------------------------- */
-
-    const oldScans = localStorage.getItem("dollhouseScans");
-
-    if (oldScans) {
-        try {
-            const scans = JSON.parse(oldScans);
-
-            if (Array.isArray(scans) && scans.length > 0) {
-                const migratedProperty = {
-                    id: "property-" + Date.now(),
-                    name: "Imported Property",
-                    createdAt: new Date().toISOString(),
-                    scans: scans.map((scan, index) => ({
-                        id: scan.id || "scan-" + Date.now() + "-" + index,
-                        date: scan.date || new Date().toISOString(),
-                        rooms: scan.rooms || 0,
-                        objects: scan.objects || 0,
-                        squareFeet: scan.squareFeet || 0,
-                        modelVersion: scan.modelVersion || 1
-                    }))
-                };
-
-                const properties = [migratedProperty];
-
-                localStorage.setItem(
-                    "dollhouseProperties",
-                    JSON.stringify(properties)
-                );
-
-                return properties;
-            }
-        } catch (error) {
-            console.log("No old scan data to migrate.");
-        }
-    }
-
-    return [];
-}
-
-
-function saveProperties(properties) {
-    localStorage.setItem(
-        "dollhouseProperties",
-        JSON.stringify(properties)
-    );
-}
-
-
-/* =========================================================
-   SCANNING
-   ========================================================= */
-
-function startScan() {
-    const activeScreen = document.querySelector(".screen.active");
-
-    let targetProperty = null;
-
-    /*
-       If the user started scanning from inside an
-       existing property, continue adding to that property.
-    */
-
-    if (
-        activeScreen &&
-        activeScreen.id === "propertyScreen" &&
-        currentPropertyId
-    ) {
-        const properties = getProperties();
-
-        targetProperty = properties.find(
-            property => property.id === currentPropertyId
-        );
-    }
-
-    /*
-       Otherwise this is a new property.
-    */
-
-    if (!targetProperty) {
-        const propertyName = prompt(
-            "Enter a name for this property:"
+    background:
+        linear-gradient(
+            180deg,
+            #11111b,
+            #08080d
         );
 
-        if (propertyName === null) {
-            return;
-        }
+    border-right: 1px solid var(--line);
 
-        const cleanName = propertyName.trim();
+    box-shadow: 20px 0 60px rgba(0,0,0,0.45);
 
-        if (cleanName.length > 0) {
-            currentScan = {
-                newPropertyName: cleanName
-            };
-        } else {
-            currentScan = {
-                newPropertyName: "New Property"
-            };
-        }
+    transform: translateX(-105%);
 
-        currentPropertyId = null;
-    }
-
-    currentViewingScan = null;
-
-    showScreen("scannerScreen");
-
-    resetScanner();
-
-    setTimeout(() => {
-        beginScanning();
-    }, 500);
+    transition: transform 0.3s ease;
 }
 
-
-function resetScanner() {
-    const progress = document.getElementById("scanProgress");
-    const percent = document.getElementById("scanPercent");
-    const status = document.getElementById("scanStatus");
-    const rooms = document.getElementById("roomCount");
-    const objects = document.getElementById("objectCount");
-
-    if (progress) progress.style.width = "0%";
-    if (percent) percent.textContent = "0%";
-
-    if (status) {
-        status.textContent = "Preparing property scan...";
-    }
-
-    if (rooms) rooms.textContent = "0";
-    if (objects) objects.textContent = "0";
-
-    if (scanTimer) {
-        clearInterval(scanTimer);
-        scanTimer = null;
-    }
+.side-menu.open {
+    transform: translateX(0);
 }
 
+.menu-top {
+    display: flex;
 
-function beginScanning() {
-    let progress = 0;
+    align-items: center;
+    justify-content: space-between;
 
-    const statusMessages = [
-        "Initializing spatial scan...",
-        "Mapping walls and surfaces...",
-        "Detecting rooms...",
-        "Analyzing objects...",
-        "Mapping doors and windows...",
-        "Capturing property geometry...",
-        "Building 3D environment...",
-        "Finalizing DOLLHOUSE model..."
-    ];
+    padding-bottom: 25px;
 
-    scanTimer = setInterval(() => {
-        progress += Math.floor(Math.random() * 7) + 4;
+    border-bottom: 1px solid var(--line);
 
-        if (progress > 100) {
-            progress = 100;
-        }
-
-        updateScanner(progress, statusMessages);
-
-        if (progress >= 100) {
-            clearInterval(scanTimer);
-            scanTimer = null;
-
-            setTimeout(() => {
-                finishScan();
-            }, 600);
-        }
-    }, 250);
+    margin-bottom: 15px;
 }
 
+.menu-brand {
+    font-size: 14px;
 
-function updateScanner(progress, statusMessages) {
-    const progressBar = document.getElementById("scanProgress");
-    const percent = document.getElementById("scanPercent");
-    const status = document.getElementById("scanStatus");
-    const rooms = document.getElementById("roomCount");
-    const objects = document.getElementById("objectCount");
+    font-weight: 900;
 
-    if (progressBar) {
-        progressBar.style.width = progress + "%";
-    }
-
-    if (percent) {
-        percent.textContent = progress + "%";
-    }
-
-    const messageIndex = Math.min(
-        Math.floor(progress / 14),
-        statusMessages.length - 1
-    );
-
-    if (status) {
-        status.textContent = statusMessages[messageIndex];
-    }
-
-    /*
-       Simulated scan information.
-       This is prototype data until native LiDAR/RoomPlan
-       is connected.
-    */
-
-    if (rooms) {
-        rooms.textContent = Math.max(
-            1,
-            Math.floor(progress / 12)
-        );
-    }
-
-    if (objects) {
-        objects.textContent = Math.floor(progress * 0.8);
-    }
+    letter-spacing: 2.5px;
 }
 
+.menu-close {
+    width: 38px;
+    height: 38px;
 
-function finishScan() {
-    const rooms = Math.max(
-        1,
-        Math.floor(Math.random() * 7) + 4
-    );
+    border-radius: 10px;
 
-    const objects = Math.floor(
-        Math.random() * 80
-    ) + 40;
+    background: rgba(255,255,255,0.06);
 
-    const squareFeet = Math.floor(
-        Math.random() * 1800
-    ) + 900;
+    border: 1px solid var(--line);
 
-    currentScan = {
-        id: "scan-" + Date.now(),
-        date: new Date().toISOString(),
-        rooms: rooms,
-        objects: objects,
-        squareFeet: squareFeet,
-        modelVersion: 1
-    };
+    font-size: 21px;
+}
 
-    currentViewingScan = currentScan;
+.menu-item {
+    width: 100%;
 
-    const resultRooms = document.getElementById("modelRooms");
-    const resultObjects = document.getElementById("modelObjects");
-    const resultSize = document.getElementById("modelSize");
+    display: flex;
+    align-items: center;
 
-    if (resultRooms) {
-        resultRooms.textContent = rooms;
-    }
+    gap: 15px;
 
-    if (resultObjects) {
-        resultObjects.textContent = objects;
-    }
+    padding: 15px;
 
-    if (resultSize) {
-        resultSize.textContent =
-            squareFeet.toLocaleString() + " sq ft";
-    }
+    margin-bottom: 5px;
 
-    lastModelSource =
-        currentPropertyId
-            ? "propertyScreen"
-            : "dashboardScreen";
+    background: transparent;
 
-    showScreen("modelScreen");
+    border-radius: 12px;
+
+    color: var(--muted-light);
+
+    text-align: left;
+
+    font-size: 13px;
+
+    transition: 0.2s ease;
+}
+
+.menu-item span {
+    width: 22px;
+
+    text-align: center;
+
+    font-size: 17px;
+}
+
+.menu-item:hover,
+.active-menu-item {
+    background: rgba(155,124,255,0.11);
+
+    color: white;
+}
+
+.menu-divider {
+    height: 1px;
+
+    background: var(--line);
+
+    margin: 15px 0;
+}
+
+.logout-item {
+    color: #ff8799;
 }
 
 
 /* =========================================================
-   SAVE SCAN
+   NEW SCAN CARD
    ========================================================= */
 
-function saveScan() {
-    if (!currentScan) {
-        alert("There is no scan to save.");
-        return;
-    }
+.new-scan-card {
+    width: 100%;
 
-    const properties = getProperties();
+    display: flex;
+    align-items: center;
 
-    let property;
+    gap: 17px;
 
-    if (currentPropertyId) {
-        property = properties.find(
-            item => item.id === currentPropertyId
-        );
-    }
+    padding: 22px;
 
-    /*
-       Create a new property if this was a new scan.
-    */
+    text-align: left;
 
-    if (!property) {
-        property = {
-            id: "property-" + Date.now(),
-            name:
-                currentScan.newPropertyName ||
-                "New Property",
-            createdAt: new Date().toISOString(),
-            scans: []
-        };
+    border-radius: var(--radius);
 
-        currentPropertyId = property.id;
-
-        properties.unshift(property);
-    }
-
-    /*
-       Remove temporary property-name information.
-    */
-
-    const scanToSave = {
-        id: currentScan.id,
-        date: currentScan.date,
-        rooms: currentScan.rooms,
-        objects: currentScan.objects,
-        squareFeet: currentScan.squareFeet,
-        modelVersion: currentScan.modelVersion
-    };
-
-    property.scans.unshift(scanToSave);
-
-    saveProperties(properties);
-
-    currentScan = scanToSave;
-    currentViewingScan = scanToSave;
-
-    renderAllProperties();
-    displaySavedScans();
-    renderPropertyDetails();
-
-    alert("Scan saved to " + property.name + ".");
-
-    showScreen("propertyScreen");
-}
-
-
-/* =========================================================
-   MY SCANS
-   ========================================================= */
-
-function renderAllProperties() {
-    const container = document.getElementById("allProperties");
-
-    if (!container) {
-        return;
-    }
-
-    const properties = getProperties();
-
-    if (properties.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state">
-                <h3>No properties yet</h3>
-                <p>Create your first property scan to get started.</p>
-            </div>
-        `;
-        return;
-    }
-
-    container.innerHTML = properties.map(property => {
-
-        const latestScan =
-            property.scans && property.scans.length
-                ? property.scans[0]
-                : null;
-
-        const dateText = latestScan
-            ? formatDate(latestScan.date)
-            : "No scans";
-
-        const scanCount =
-            property.scans
-                ? property.scans.length
-                : 0;
-
-        return `
-            <div class="property-card"
-                 onclick="openProperty('${property.id}')">
-
-                <div class="property-card-icon">
-                    ◈
-                </div>
-
-                <div class="property-card-info">
-                    <h3>${escapeHTML(property.name)}</h3>
-
-                    <p>
-                        ${scanCount}
-                        ${scanCount === 1 ? "scan" : "scans"}
-                    </p>
-
-                    <span>
-                        Last scanned: ${dateText}
-                    </span>
-                </div>
-
-                <div class="property-card-arrow">
-                    →
-                </div>
-
-            </div>
-        `;
-    }).join("");
-}
-
-
-function displaySavedScans() {
-    const container = document.getElementById("savedScans");
-
-    if (!container) {
-        return;
-    }
-
-    const properties = getProperties();
-
-    if (properties.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state">
-                <p>Your saved properties will appear here.</p>
-            </div>
-        `;
-        return;
-    }
-
-    const recentProperties = properties.slice(0, 3);
-
-    container.innerHTML = recentProperties.map(property => {
-
-        const latestScan =
-            property.scans &&
-            property.scans.length
-                ? property.scans[0]
-                : null;
-
-        return `
-            <div class="property-card"
-                 onclick="openProperty('${property.id}')">
-
-                <div class="property-card-icon">
-                    ◈
-                </div>
-
-                <div class="property-card-info">
-                    <h3>${escapeHTML(property.name)}</h3>
-
-                    <p>
-                        ${property.scans.length}
-                        scan${property.scans.length === 1 ? "" : "s"}
-                    </p>
-
-                    <span>
-                        ${latestScan
-                            ? formatDate(latestScan.date)
-                            : "No scans"}
-                    </span>
-                </div>
-
-                <div class="property-card-arrow">
-                    →
-                </div>
-
-            </div>
-        `;
-    }).join("");
-}
-
-
-/* =========================================================
-   PROPERTY DETAILS
-   ========================================================= */
-
-function openProperty(propertyId) {
-    currentPropertyId = propertyId;
-
-    renderPropertyDetails();
-
-    showScreen("propertyScreen");
-}
-
-
-function renderPropertyDetails() {
-    if (!currentPropertyId) {
-        return;
-    }
-
-    const properties = getProperties();
-
-    const property = properties.find(
-        item => item.id === currentPropertyId
-    );
-
-    if (!property) {
-        return;
-    }
-
-    const title = document.getElementById("propertyTitle");
-    const subtitle = document.getElementById("propertySubtitle");
-    const nameDisplay = document.getElementById("propertyNameDisplay");
-    const stats = document.getElementById("propertyStats");
-    const history = document.getElementById("propertyScanHistory");
-
-    if (title) {
-        title.textContent = property.name;
-    }
-
-    if (subtitle) {
-        subtitle.textContent =
-            property.scans.length +
-            (property.scans.length === 1
-                ? " saved scan"
-                : " saved scans");
-    }
-
-    if (nameDisplay) {
-        nameDisplay.textContent = property.name;
-    }
-
-    const latest = property.scans[0];
-
-    if (stats) {
-        if (latest) {
-            stats.innerHTML = `
-                <div>
-                    <strong>${latest.rooms}</strong>
-                    <span>Rooms</span>
-                </div>
-
-                <div>
-                    <strong>${latest.objects}</strong>
-                    <span>Objects</span>
-                </div>
-
-                <div>
-                    <strong>${latest.squareFeet.toLocaleString()}</strong>
-                    <span>Sq Ft</span>
-                </div>
-            `;
-        } else {
-            stats.innerHTML = "";
-        }
-    }
-
-    if (history) {
-        if (!property.scans.length) {
-            history.innerHTML = `
-                <div class="empty-state">
-                    <p>No scans have been saved for this property.</p>
-                </div>
-            `;
-        } else {
-            history.innerHTML = property.scans.map(
-                (scan, index) => `
-                    <div class="history-card">
-
-                        <div class="history-date">
-                            ${formatDate(scan.date)}
-                        </div>
-
-                        <div class="history-info">
-                            <span>
-                                ${scan.rooms} rooms
-                            </span>
-
-                            <span>
-                                ${scan.objects} objects
-                            </span>
-
-                            <span>
-                                ${scan.squareFeet.toLocaleString()} sq ft
-                            </span>
-                        </div>
-
-                        <button
-                            class="secondary-button"
-                            onclick="viewHistoricalScan('${property.id}', '${scan.id}')">
-
-                            ${index === 0
-                                ? "VIEW 3D MODEL"
-                                : "VIEW HISTORICAL MODEL"}
-
-                        </button>
-
-                    </div>
-                `
-            ).join("");
-        }
-    }
-
-    updatePropertyAI(property);
-}
-
-
-/* =========================================================
-   PROPERTY AI
-   ========================================================= */
-
-function updatePropertyAI(property) {
-    const changeSummary =
-        document.getElementById("changeSummary");
-
-    const maintenanceSummary =
-        document.getElementById("maintenanceSummary");
-
-    const propertyAISummary =
-        document.getElementById("propertyAISummary");
-
-    const premium = isPremium();
-
-    if (!premium) {
-        if (changeSummary) {
-            changeSummary.textContent =
-                "Premium feature — compare scans from different dates.";
-        }
-
-        if (maintenanceSummary) {
-            maintenanceSummary.textContent =
-                "Premium feature — get AI-generated maintenance suggestions.";
-        }
-
-        if (propertyAISummary) {
-            propertyAISummary.textContent =
-                "Premium unlocks detailed property intelligence.";
-        }
-
-        return;
-    }
-
-    if (!property.scans || property.scans.length === 0) {
-        return;
-    }
-
-    const latest = property.scans[0];
-
-    if (property.scans.length >= 2) {
-        const previous = property.scans[1];
-
-        const roomDifference =
-            latest.rooms - previous.rooms;
-
-        const objectDifference =
-            latest.objects - previous.objects;
-
-        let roomText =
-            roomDifference === 0
-                ? "The room count is unchanged."
-                : roomDifference > 0
-                    ? `The latest scan identifies ${roomDifference} additional room${roomDifference === 1 ? "" : "s"}.`
-                    : `The latest scan identifies ${Math.abs(roomDifference)} fewer room${Math.abs(roomDifference) === 1 ? "" : "s"}.`;
-
-        let objectText =
-            objectDifference === 0
-                ? "Object detection is similar."
-                : objectDifference > 0
-                    ? `The scan detected approximately ${objectDifference} more objects.`
-                    : `The scan detected approximately ${Math.abs(objectDifference)} fewer objects.`;
-
-        if (changeSummary) {
-            changeSummary.innerHTML = `
-                <strong>AI Change Summary</strong>
-                <p>
-                    ${roomText}
-                    ${objectText}
-                    Review the historical 3D models for a closer comparison.
-                </p>
-            `;
-        }
-    } else {
-        if (changeSummary) {
-            changeSummary.innerHTML = `
-                <strong>AI Change Summary</strong>
-                <p>
-                    Complete another scan of this property to unlock
-                    date-to-date change analysis.
-                </p>
-            `;
-        }
-    }
-
-    if (maintenanceSummary) {
-        maintenanceSummary.innerHTML = `
-            <strong>AI Maintenance Check</strong>
-            <p>
-                Review walls, doors, windows, fixtures, and other
-                property elements during your next inspection.
-                DOLLHOUSE can organize areas that may need attention.
-            </p>
-        `;
-    }
-
-    if (propertyAISummary) {
-        propertyAISummary.innerHTML = `
-            <strong>AI Property Summary</strong>
-            <p>
-                ${latest.rooms} rooms and approximately
-                ${latest.squareFeet.toLocaleString()} square feet
-                were identified in the latest scan.
-                Use historical scans to monitor the property over time.
-            </p>
-        `;
-    }
-}
-
-
-function unlockPremiumAI() {
-    showScreen("premiumScreen");
-}
-
-
-/* =========================================================
-   HISTORICAL SCANS
-   ========================================================= */
-
-function viewHistoricalScan(propertyId, scanId) {
-
-    if (!isPremium()) {
-        alert(
-            "Historical scan viewing and property comparison are Premium features."
+    background:
+        linear-gradient(
+            135deg,
+            rgba(155,124,255,0.17),
+            rgba(86,230,255,0.055)
         );
 
-        showScreen("premiumScreen");
-        return;
-    }
+    border: 1px solid rgba(155,124,255,0.24);
 
-    const properties = getProperties();
+    box-shadow:
+        0 20px 55px rgba(55, 38, 130, 0.16);
 
-    const property = properties.find(
-        item => item.id === propertyId
-    );
-
-    if (!property) {
-        return;
-    }
-
-    const scan = property.scans.find(
-        item => item.id === scanId
-    );
-
-    if (!scan) {
-        return;
-    }
-
-    currentPropertyId = propertyId;
-    currentViewingScan = scan;
-
-    lastModelSource = "propertyScreen";
-
-    updateModelScreen(property, scan);
-
-    showScreen("modelScreen");
+    transition: 0.2s ease;
 }
 
+.new-scan-card:hover {
+    transform: translateY(-2px);
 
-function updateModelScreen(property, scan) {
-    const modelTitle =
-        document.getElementById("modelTitle");
-
-    const modelDate =
-        document.getElementById("modelDate");
-
-    const modelRooms =
-        document.getElementById("modelRooms");
-
-    const modelObjects =
-        document.getElementById("modelObjects");
-
-    const modelSize =
-        document.getElementById("modelSize");
-
-    if (modelTitle) {
-        modelTitle.textContent =
-            property.name + " — 3D Model";
-    }
-
-    if (modelDate) {
-        modelDate.textContent =
-            formatDate(scan.date);
-    }
-
-    if (modelRooms) {
-        modelRooms.textContent = scan.rooms;
-    }
-
-    if (modelObjects) {
-        modelObjects.textContent = scan.objects;
-    }
-
-    if (modelSize) {
-        modelSize.textContent =
-            scan.squareFeet.toLocaleString() +
-            " sq ft";
-    }
+    border-color: rgba(155,124,255,0.4);
 }
 
+.new-scan-icon {
+    width: 58px;
+    height: 58px;
 
-/* =========================================================
-   DELETE SCAN
-   ========================================================= */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-function deleteCurrentScan() {
+    flex-shrink: 0;
 
-    if (
-        currentPropertyId &&
-        currentViewingScan &&
-        isPremium()
-    ) {
-        const confirmDelete = confirm(
-            "Delete this saved scan?"
+    border-radius: 18px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(155,124,255,0.24),
+            rgba(86,230,255,0.13)
         );
 
-        if (!confirmDelete) {
-            return;
-        }
+    font-size: 29px;
 
-        const properties = getProperties();
+    box-shadow:
+        0 0 35px rgba(155,124,255,0.12);
+}
 
-        const property = properties.find(
-            item => item.id === currentPropertyId
+.new-scan-text {
+    flex: 1;
+}
+
+.card-label {
+    color: var(--cyan);
+
+    font-size: 9px;
+
+    font-weight: 900;
+
+    letter-spacing: 1.5px;
+}
+
+.new-scan-text h2 {
+    font-size: 19px;
+
+    margin-top: 4px;
+}
+
+.new-scan-text p {
+    color: var(--muted);
+
+    font-size: 11px;
+
+    line-height: 1.5;
+
+    margin-top: 4px;
+}
+
+.card-arrow {
+    color: var(--muted-light);
+
+    font-size: 23px;
+}
+
+
+/* =========================================================
+   PLAN CARD
+   ========================================================= */
+
+.plan-card {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 15px;
+
+    margin-top: 14px;
+
+    padding: 19px;
+
+    background: rgba(255,255,255,0.035);
+
+    border: 1px solid var(--line);
+
+    border-radius: var(--radius-small);
+}
+
+.small-label {
+    display: block;
+
+    color: var(--muted);
+
+    font-size: 9px;
+
+    font-weight: 900;
+
+    letter-spacing: 1.2px;
+}
+
+.plan-card h3 {
+    margin-top: 5px;
+
+    font-size: 17px;
+}
+
+.plan-card p {
+    color: var(--muted);
+
+    font-size: 11px;
+
+    margin-top: 3px;
+}
+
+
+/* =========================================================
+   SECTION TITLES
+   ========================================================= */
+
+.section-title-row {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    margin: 30px 0 13px;
+}
+
+.section-title-row h2 {
+    font-size: 17px;
+}
+
+
+/* =========================================================
+   EMPTY STATES
+   ========================================================= */
+
+.empty-state {
+    padding: 48px 20px;
+
+    text-align: center;
+
+    border: 1px dashed rgba(255,255,255,0.11);
+
+    border-radius: var(--radius);
+
+    background: rgba(255,255,255,0.018);
+}
+
+.empty-state-icon {
+    width: 55px;
+    height: 55px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 0 auto 14px;
+
+    border-radius: 17px;
+
+    background: rgba(155,124,255,0.09);
+
+    color: var(--purple);
+
+    font-size: 25px;
+}
+
+.empty-state h3 {
+    font-size: 15px;
+
+    margin-bottom: 6px;
+}
+
+.empty-state p {
+    max-width: 310px;
+
+    margin: auto;
+
+    color: var(--muted);
+
+    font-size: 12px;
+
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   SEARCH
+   ========================================================= */
+
+.search-box {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    height: 50px;
+
+    padding: 0 15px;
+
+    border-radius: 14px;
+
+    background: rgba(255,255,255,0.045);
+
+    border: 1px solid var(--line);
+}
+
+.search-box span {
+    color: var(--muted);
+
+    font-size: 20px;
+}
+
+.search-box input {
+    width: 100%;
+
+    border: none;
+
+    background: transparent;
+
+    color: white;
+
+    font-size: 14px;
+}
+
+.search-box input::placeholder {
+    color: #686875;
+}
+
+
+/* =========================================================
+   PAGE CONTENT
+   ========================================================= */
+
+.page-content {
+    padding-bottom: 50px;
+}
+
+
+/* =========================================================
+   PROPERTY OVERVIEW
+   ========================================================= */
+
+.property-overview {
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    padding: 20px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,0.055),
+            rgba(255,255,255,0.025)
         );
 
-        if (property) {
-            property.scans =
-                property.scans.filter(
-                    scan =>
-                        scan.id !==
-                        currentViewingScan.id
-                );
+    border: 1px solid var(--line);
 
-            saveProperties(properties);
-
-            currentViewingScan = null;
-
-            renderPropertyDetails();
-            displaySavedScans();
-
-            showScreen("propertyScreen");
-
-            return;
-        }
-    }
-
-    currentScan = null;
-    currentViewingScan = null;
-
-    showScreen(
-        currentPropertyId
-            ? "propertyScreen"
-            : "dashboardScreen"
-    );
+    border-radius: var(--radius);
 }
 
+.property-icon {
+    width: 55px;
+    height: 55px;
 
-function deleteScan(scanId) {
-    const properties = getProperties();
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-    let changed = false;
+    border-radius: 17px;
 
-    properties.forEach(property => {
-        const originalLength =
-            property.scans.length;
+    background: rgba(155,124,255,0.1);
 
-        property.scans =
-            property.scans.filter(
-                scan => scan.id !== scanId
-            );
+    font-size: 26px;
+}
 
-        if (
-            property.scans.length !==
-            originalLength
-        ) {
-            changed = true;
-        }
-    });
+.property-overview h2 {
+    font-size: 17px;
+}
 
-    if (changed) {
-        saveProperties(properties);
-        displaySavedScans();
-        renderAllProperties();
-    }
+.property-overview p {
+    color: var(--muted);
+
+    font-size: 11px;
+
+    margin-top: 4px;
 }
 
 
 /* =========================================================
-   CANCEL SCAN
+   PROPERTY HISTORY
    ========================================================= */
 
-function cancelScan() {
-    if (scanTimer) {
-        clearInterval(scanTimer);
-        scanTimer = null;
-    }
+.premium-tag {
+    display: inline-flex;
 
-    currentScan = null;
+    align-items: center;
 
-    showScreen(
-        currentPropertyId
-            ? "propertyScreen"
-            : "dashboardScreen"
-    );
+    padding: 5px 8px;
+
+    border-radius: 7px;
+
+    background: rgba(155,124,255,0.1);
+
+    border: 1px solid rgba(155,124,255,0.2);
+
+    color: #c5b7ff;
+
+    font-size: 8px;
+
+    font-weight: 900;
+
+    letter-spacing: 0.8px;
+}
+
+.property-history-card {
+    padding: 17px;
+
+    margin-bottom: 9px;
+
+    border-radius: 15px;
+
+    background: rgba(255,255,255,0.04);
+
+    border: 1px solid var(--line);
 }
 
 
 /* =========================================================
-   SCAN HELP
+   PREMIUM ANALYSIS
    ========================================================= */
 
-function showScanHelp() {
-    alert(
-        "Move slowly through the property while the scanner captures the space. " +
-        "The current GitHub prototype simulates the scanning process. " +
-        "Native LiDAR scanning will be connected in a future version."
-    );
-}
+.premium-analysis {
+    margin-top: 28px;
 
+    padding: 20px;
 
-/* =========================================================
-   PREMIUM
-   ========================================================= */
+    border-radius: var(--radius);
 
-function selectSubscription(plan) {
-    selectedSubscription = plan;
-
-    document
-        .querySelectorAll(".subscription-card")
-        .forEach(card => {
-            card.classList.remove("selected");
-        });
-
-    const selectedCard =
-        document.querySelector(
-            `[data-plan="${plan}"]`
+    background:
+        linear-gradient(
+            145deg,
+            rgba(155,124,255,0.08),
+            rgba(255,255,255,0.025)
         );
 
-    if (selectedCard) {
-        selectedCard.classList.add("selected");
-    }
-
-    const subscribeButton =
-        document.getElementById("subscribeButton");
-
-    if (subscribeButton) {
-        const names = {
-            weekly: "WEEKLY — $4.99",
-            monthly: "MONTHLY — $14.99",
-            yearly: "YEARLY — $249.99"
-        };
-
-        subscribeButton.textContent =
-            "CONTINUE WITH " + names[plan];
-    }
+    border: 1px solid rgba(155,124,255,0.16);
 }
 
+.analysis-header {
+    display: flex;
 
-function activatePremium() {
-    if (!selectedSubscription) {
-        alert("Please select a subscription plan first.");
-        return;
-    }
+    justify-content: space-between;
 
-    /*
-       Prototype-only activation.
-       No real payment is processed.
-    */
+    gap: 15px;
 
-    localStorage.setItem(
-        "dollhousePremium",
-        "true"
-    );
-
-    localStorage.setItem(
-        "dollhousePlan",
-        selectedSubscription
-    );
-
-    updateProfile();
-
-    alert(
-        "Premium activated for this prototype."
-    );
-
-    showScreen("dashboardScreen");
+    margin-bottom: 17px;
 }
 
+.analysis-header h2 {
+    margin-top: 8px;
 
-function isPremium() {
-    return (
-        localStorage.getItem(
-            "dollhousePremium"
-        ) === "true"
-    );
+    font-size: 17px;
+}
+
+.analysis-icon {
+    font-size: 26px;
+
+    color: var(--purple);
+}
+
+.analysis-card {
+    padding: 16px;
+
+    margin-top: 9px;
+
+    border-radius: 13px;
+
+    background: rgba(0,0,0,0.2);
+
+    border: 1px solid var(--line);
+}
+
+.analysis-label {
+    color: var(--muted);
+
+    font-size: 8px;
+
+    font-weight: 900;
+
+    letter-spacing: 1.1px;
+}
+
+.analysis-card p {
+    color: var(--muted-light);
+
+    font-size: 12px;
+
+    line-height: 1.6;
+
+    margin-top: 7px;
+}
+
+.premium-lock-button {
+    width: 100%;
+
+    margin-top: 13px;
+
+    padding: 14px;
+
+    border-radius: 12px;
+
+    background: rgba(155,124,255,0.12);
+
+    border: 1px solid rgba(155,124,255,0.2);
+
+    color: #cbbfff;
+
+    font-size: 10px;
+
+    font-weight: 900;
+
+    letter-spacing: 0.8px;
 }
 
 
@@ -1135,217 +1332,104 @@ function isPremium() {
    PROFILE
    ========================================================= */
 
-function updateProfile() {
-    const email =
-        localStorage.getItem("dollhouseEmail");
+.profile-card {
+    padding: 30px 20px;
 
-    const profileEmail =
-        document.getElementById("profileEmail");
+    text-align: center;
 
-    const profilePlan =
-        document.getElementById("profilePlan");
+    border-radius: var(--radius);
 
-    if (profileEmail) {
-        profileEmail.textContent =
-            email || "Not signed in";
-    }
+    background:
+        radial-gradient(
+            circle at 50% 0%,
+            rgba(155,124,255,0.13),
+            transparent 55%
+        ),
+        rgba(255,255,255,0.035);
 
-    if (profilePlan) {
-        if (isPremium()) {
-            const plan =
-                localStorage.getItem("dollhousePlan");
-
-            profilePlan.textContent =
-                "DOLLHOUSE Premium — " +
-                (plan || "Active");
-        } else {
-            profilePlan.textContent =
-                "Free Plan";
-        }
-    }
+    border: 1px solid var(--line);
 }
 
+.profile-avatar {
+    width: 76px;
+    height: 76px;
 
-/* =========================================================
-   PROPERTY SEARCH
-   ========================================================= */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-function filterProperties() {
-    const searchInput =
-        document.getElementById("propertySearch");
+    margin: 0 auto 14px;
 
-    const container =
-        document.getElementById("allProperties");
+    border-radius: 50%;
 
-    if (!searchInput || !container) {
-        return;
-    }
-
-    const searchTerm =
-        searchInput.value
-            .trim()
-            .toLowerCase();
-
-    const properties = getProperties();
-
-    const filtered =
-        properties.filter(property =>
-            property.name
-                .toLowerCase()
-                .includes(searchTerm)
+    background:
+        linear-gradient(
+            135deg,
+            rgba(155,124,255,0.2),
+            rgba(86,230,255,0.1)
         );
 
-    if (filtered.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state">
-                <p>No properties match your search.</p>
-            </div>
-        `;
-        return;
-    }
+    border: 1px solid rgba(155,124,255,0.25);
 
-    container.innerHTML = filtered.map(property => {
-
-        const latestScan =
-            property.scans[0];
-
-        return `
-            <div class="property-card"
-                 onclick="openProperty('${property.id}')">
-
-                <div class="property-card-icon">
-                    ◈
-                </div>
-
-                <div class="property-card-info">
-
-                    <h3>
-                        ${escapeHTML(property.name)}
-                    </h3>
-
-                    <p>
-                        ${property.scans.length}
-                        scan${property.scans.length === 1 ? "" : "s"}
-                    </p>
-
-                    <span>
-                        ${latestScan
-                            ? "Last scanned: " +
-                              formatDate(latestScan.date)
-                            : "No scans"}
-                    </span>
-
-                </div>
-
-                <div class="property-card-arrow">
-                    →
-                </div>
-
-            </div>
-        `;
-    }).join("");
+    font-size: 35px;
 }
 
+.profile-card h2 {
+    font-size: 16px;
 
-/* =========================================================
-   AI ASSISTANT
-   ========================================================= */
-
-function sendMessage() {
-    const input =
-        document.getElementById("aiInput");
-
-    const messages =
-        document.getElementById("chatMessages");
-
-    if (!input || !messages) {
-        return;
-    }
-
-    const message =
-        input.value.trim();
-
-    if (!message) {
-        return;
-    }
-
-    const userMessage =
-        document.createElement("div");
-
-    userMessage.className =
-        "chat-message user-message";
-
-    userMessage.textContent = message;
-
-    messages.appendChild(userMessage);
-
-    input.value = "";
-
-    setTimeout(() => {
-
-        const response =
-            generateAIResponse(message);
-
-        const aiMessage =
-            document.createElement("div");
-
-        aiMessage.className =
-            "chat-message ai-message";
-
-        aiMessage.textContent = response;
-
-        messages.appendChild(aiMessage);
-
-        messages.scrollTop =
-            messages.scrollHeight;
-
-    }, 500);
+    word-break: break-word;
 }
 
+.profile-plan {
+    display: inline-block;
 
-function handleChatKey(event) {
-    if (event.key === "Enter") {
-        sendMessage();
-    }
+    margin-top: 8px;
+
+    padding: 6px 9px;
+
+    border-radius: 7px;
+
+    background: rgba(255,255,255,0.06);
+
+    color: var(--muted-light);
+
+    font-size: 8px;
+
+    font-weight: 900;
+
+    letter-spacing: 1px;
 }
 
+.profile-options {
+    margin-top: 14px;
+}
 
-function generateAIResponse(message) {
-    const text =
-        message.toLowerCase();
+.profile-option {
+    width: 100%;
 
-    if (
-        text.includes("maintenance") ||
-        text.includes("fix") ||
-        text.includes("repair")
-    ) {
-        return "I can help organize potential maintenance areas by property, room, and scan date. Premium property intelligence can also track changes between scans.";
-    }
+    display: grid;
 
-    if (
-        text.includes("scan") ||
-        text.includes("lidar")
-    ) {
-        return "DOLLHOUSE is designed to scan an entire property and turn the captured spatial information into an interactive 3D model. The current GitHub version uses a simulated scanner.";
-    }
+    grid-template-columns: 25px 1fr 20px;
 
-    if (
-        text.includes("compare") ||
-        text.includes("change")
-    ) {
-        return isPremium()
-            ? "Open a property to compare its saved scan history and review the AI change summary."
-            : "Scan comparison is a Premium feature.";
-    }
+    align-items: center;
 
-    if (
-        text.includes("property") ||
-        text.includes("house")
-    ) {
-        return "Open My Scans to organize properties and view their scan history.";
-    }
+    gap: 10px;
 
-    return "I can help with property scans, 3D models, maintenance organization, scan history, and DOLLHOUSE features.";
+    padding: 17px;
+
+    margin-bottom: 7px;
+
+    text-align: left;
+
+    border-radius: 14px;
+
+    background: rgba(255,255,255,0.035);
+
+    border: 1px solid var(--line);
+
+    color: var(--muted-light);
+
+    font-size: 13px;
 }
 
 
@@ -1353,103 +1437,1377 @@ function generateAIResponse(message) {
    SETTINGS
    ========================================================= */
 
-function resetAppData() {
-    const confirmed = confirm(
-        "This will delete your saved DOLLHOUSE prototype data. Continue?"
-    );
+.settings-card {
+    overflow: hidden;
 
-    if (!confirmed) {
-        return;
-    }
+    border-radius: var(--radius);
 
-    localStorage.removeItem(
-        "dollhouseProperties"
-    );
+    border: 1px solid var(--line);
 
-    localStorage.removeItem(
-        "dollhouseScans"
-    );
+    background: rgba(255,255,255,0.03);
+}
 
-    localStorage.removeItem(
-        "dollhousePremium"
-    );
+.setting-row {
+    display: flex;
 
-    localStorage.removeItem(
-        "dollhousePlan"
-    );
+    align-items: center;
+    justify-content: space-between;
 
-    alert("DOLLHOUSE data has been reset.");
+    gap: 15px;
 
-    location.reload();
+    padding: 20px;
+
+    border-bottom: 1px solid var(--line);
+}
+
+.setting-row:last-child {
+    border-bottom: none;
+}
+
+.setting-row h3 {
+    font-size: 13px;
+}
+
+.setting-row p {
+    color: var(--muted);
+
+    font-size: 10px;
+
+    margin-top: 4px;
+}
+
+.setting-row input {
+    width: 18px;
+    height: 18px;
+
+    accent-color: var(--purple);
+}
+
+.danger-setting h3 {
+    color: #ff8799;
+}
+
+.danger-button {
+    padding: 9px 12px;
+
+    border-radius: 9px;
+
+    background: rgba(255,100,124,0.1);
+
+    border: 1px solid rgba(255,100,124,0.2);
+
+    color: #ff8295;
+
+    font-size: 9px;
+
+    font-weight: 900;
 }
 
 
 /* =========================================================
-   UTILITIES
+   SCANNER
    ========================================================= */
 
-function formatDate(dateString) {
-    const date = new Date(dateString);
+.scanner-screen {
+    overflow: hidden;
 
-    return date.toLocaleDateString(
-        undefined,
-        {
-            year: "numeric",
-            month: "long",
-            day: "numeric"
-        }
-    );
+    background:
+        radial-gradient(
+            circle at 50% 50%,
+            rgba(90, 72, 170, 0.12),
+            transparent 45%
+        ),
+        #030306;
+}
+
+.scanner-background {
+    position: absolute;
+
+    inset: 0;
+
+    overflow: hidden;
+}
+
+.scanner-grid {
+    position: absolute;
+
+    inset: -30%;
+
+    opacity: 0.22;
+
+    background-image:
+        linear-gradient(
+            rgba(100, 200, 255, 0.17) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(100, 200, 255, 0.17) 1px,
+            transparent 1px
+        );
+
+    background-size: 55px 55px;
+
+    transform:
+        perspective(500px)
+        rotateX(60deg)
+        translateY(25%);
+
+    animation: gridMove 8s linear infinite;
 }
 
 
-function escapeHTML(value) {
-    return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+.laser {
+    position: absolute;
+
+    height: 2px;
+
+    width: 160%;
+
+    left: -30%;
+
+    transform-origin: center;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            var(--purple),
+            var(--cyan),
+            var(--pink),
+            transparent
+        );
+
+    filter:
+        blur(0.5px)
+        drop-shadow(0 0 8px rgba(120,180,255,0.8));
+
+    opacity: 0.7;
+
+    animation: laserMove 3.5s ease-in-out infinite;
+}
+
+.laser-1 {
+    top: 20%;
+    transform: rotate(14deg);
+}
+
+.laser-2 {
+    top: 28%;
+    transform: rotate(-18deg);
+    animation-delay: -1s;
+}
+
+.laser-3 {
+    top: 37%;
+    transform: rotate(7deg);
+    animation-delay: -2s;
+}
+
+.laser-4 {
+    top: 46%;
+    transform: rotate(-12deg);
+    animation-delay: -0.5s;
+}
+
+.laser-5 {
+    top: 54%;
+    transform: rotate(18deg);
+    animation-delay: -1.7s;
+}
+
+.laser-6 {
+    top: 63%;
+    transform: rotate(-8deg);
+    animation-delay: -2.3s;
+}
+
+.laser-7 {
+    top: 72%;
+    transform: rotate(13deg);
+    animation-delay: -0.8s;
+}
+
+.laser-8 {
+    top: 80%;
+    transform: rotate(-15deg);
+    animation-delay: -2.7s;
+}
+
+.laser-9 {
+    top: 34%;
+    transform: rotate(30deg);
+    animation-delay: -1.4s;
+}
+
+.laser-10 {
+    top: 68%;
+    transform: rotate(-27deg);
+    animation-delay: -2s;
+}
+
+
+.scanner-interface {
+    position: relative;
+
+    z-index: 2;
+
+    min-height: 100vh;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: space-between;
+
+    padding:
+        25px
+        max(25px, env(safe-area-inset-right))
+        30px
+        max(25px, env(safe-area-inset-left));
+}
+
+.scanner-top {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+}
+
+.glass-button {
+    width: 44px;
+    height: 44px;
+
+    border-radius: 13px;
+
+    background: rgba(10,10,18,0.6);
+
+    border: 1px solid rgba(255,255,255,0.15);
+
+    backdrop-filter: blur(15px);
+
+    font-size: 20px;
+}
+
+.scanner-title {
+    font-size: 11px;
+
+    font-weight: 900;
+
+    letter-spacing: 2px;
+}
+
+
+.scanner-main {
+    display: flex;
+
+    align-items: center;
+
+    flex-direction: column;
+
+    text-align: center;
+}
+
+.scanner-ring {
+    width: 210px;
+    height: 210px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(155,124,255,0.12),
+            rgba(5,5,9,0.5) 58%,
+            transparent 59%
+        );
+
+    border:
+        1px solid rgba(155,124,255,0.38);
+
+    box-shadow:
+        0 0 35px rgba(155,124,255,0.12),
+        inset 0 0 35px rgba(86,230,255,0.06);
+
+    animation: scannerPulse 2.5s ease-in-out infinite;
+}
+
+.scan-percentage {
+    font-size: 42px;
+
+    font-weight: 300;
+
+    letter-spacing: -2px;
+}
+
+.scanner-main h2 {
+    margin-top: 25px;
+
+    font-size: 18px;
+}
+
+.scanner-main p {
+    margin-top: 8px;
+
+    color: var(--muted);
+
+    font-size: 12px;
+}
+
+.scan-mode {
+    display: flex;
+
+    gap: 8px;
+
+    margin-top: 18px;
+
+    padding: 6px;
+
+    border-radius: 10px;
+
+    background: rgba(0,0,0,0.35);
+
+    border: 1px solid var(--line);
+
+    font-size: 8px;
+
+    font-weight: 900;
+
+    letter-spacing: 1px;
+
+    color: var(--muted);
+}
+
+.scan-mode span {
+    padding: 6px 9px;
+}
+
+.mode-active {
+    border-radius: 6px;
+
+    background: rgba(155,124,255,0.18);
+
+    color: white;
+}
+
+
+.progress-track {
+    width: 100%;
+
+    height: 4px;
+
+    border-radius: 10px;
+
+    overflow: hidden;
+
+    background: rgba(255,255,255,0.08);
+}
+
+.progress-bar {
+    width: 0%;
+
+    height: 100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--purple),
+            var(--cyan),
+            var(--pink)
+        );
+
+    box-shadow:
+        0 0 12px rgba(100,200,255,0.7);
+
+    transition: width 0.25s linear;
+}
+
+.scanner-stats {
+    display: flex;
+
+    justify-content: space-between;
+
+    margin-top: 13px;
+
+    color: var(--muted-light);
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    letter-spacing: 0.8px;
 }
 
 
 /* =========================================================
-   INITIALIZE APP
+   MODEL
    ========================================================= */
 
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
+#modelScreen {
+    background:
+        radial-gradient(
+            circle at 50% 40%,
+            rgba(100,90,200,0.14),
+            transparent 42%
+        ),
+        #050509;
 
-        const signedIn =
-            localStorage.getItem(
-                "dollhouseSignedIn"
-            ) === "true";
+    padding-bottom: 30px;
+}
 
-        updateProfile();
-        displaySavedScans();
-        renderAllProperties();
+.model-header {
+    display: flex;
 
-        /*
-           Make the model screen's back button
-           return to the property when viewing
-           a historical scan.
-        */
+    align-items: center;
+    justify-content: space-between;
 
-        const modelBackButton =
-            document.querySelector(
-                "#modelScreen .back-button"
-            );
+    gap: 15px;
 
-        if (modelBackButton) {
-            modelBackButton.onclick = () => {
-                showScreen(lastModelSource);
-            };
-        }
+    padding: 20px;
 
-        if (signedIn) {
-            showScreen("dashboardScreen");
-        } else {
-            showScreen("welcomeScreen");
-        }
+    border-bottom: 1px solid var(--line);
+}
+
+.model-header > div {
+    text-align: center;
+}
+
+.model-header h1 {
+    font-size: 15px;
+
+    letter-spacing: 2px;
+}
+
+.model-header p {
+    color: var(--muted);
+
+    font-size: 8px;
+
+    margin-top: 3px;
+
+    letter-spacing: 0.7px;
+}
+
+.delete-button {
+    width: 42px;
+    height: 42px;
+
+    border-radius: 12px;
+
+    background: rgba(255,100,124,0.07);
+
+    border: 1px solid rgba(255,100,124,0.13);
+
+    font-size: 17px;
+}
+
+
+.model-viewer {
+    position: relative;
+
+    width: min(700px, 100%);
+
+    height: 390px;
+
+    margin: 20px auto;
+
+    overflow: hidden;
+
+    border-radius: 24px;
+
+    border: 1px solid var(--line);
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(100,120,255,0.08),
+            transparent 50%
+        ),
+        #080810;
+}
+
+.model-glow {
+    position: absolute;
+
+    width: 280px;
+    height: 280px;
+
+    left: 50%;
+    top: 48%;
+
+    transform: translate(-50%, -50%);
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--purple),
+            var(--cyan)
+        );
+
+    filter: blur(90px);
+
+    opacity: 0.11;
+}
+
+.model-room {
+    position: absolute;
+
+    width: 260px;
+    height: 210px;
+
+    left: 50%;
+    top: 48%;
+
+    transform:
+        translate(-50%, -50%)
+        perspective(700px)
+        rotateX(58deg)
+        rotateZ(-8deg);
+
+    transform-style: preserve-3d;
+}
+
+.model-wall {
+    position: absolute;
+
+    border: 1px solid rgba(145,130,255,0.55);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(155,124,255,0.11),
+            rgba(86,230,255,0.035)
+        );
+
+    box-shadow:
+        0 0 20px rgba(120,100,255,0.08);
+}
+
+.model-back-wall {
+    width: 260px;
+    height: 210px;
+
+    left: 0;
+    top: 0;
+
+    transform: translateZ(-35px);
+}
+
+.model-left-wall {
+    width: 210px;
+    height: 210px;
+
+    left: -105px;
+    top: 0;
+
+    transform:
+        rotateY(90deg)
+        translateZ(130px);
+}
+
+.model-floor {
+    position: absolute;
+
+    width: 260px;
+    height: 210px;
+
+    left: 0;
+    top: 0;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(120,130,180,0.07),
+            rgba(255,255,255,0.025)
+        );
+
+    border: 1px solid rgba(145,130,255,0.4);
+
+    transform: translateZ(0);
+}
+
+.model-ceiling {
+    position: absolute;
+
+    width: 260px;
+    height: 210px;
+
+    left: 0;
+    top: -210px;
+
+    border: 1px solid rgba(145,130,255,0.16);
+
+    transform:
+        rotateX(90deg)
+        translateZ(210px);
+
+    opacity: 0.2;
+}
+
+.model-door {
+    position: absolute;
+
+    width: 38px;
+    height: 75px;
+
+    left: 20px;
+    top: 75px;
+
+    border: 1px solid rgba(86,230,255,0.55);
+
+    background: rgba(86,230,255,0.06);
+}
+
+.model-window {
+    position: absolute;
+
+    width: 62px;
+    height: 42px;
+
+    right: 28px;
+    top: 40px;
+
+    border: 1px solid rgba(86,230,255,0.55);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(86,230,255,0.12),
+            rgba(155,124,255,0.06)
+        );
+}
+
+.model-furniture {
+    position: absolute;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: var(--cyan);
+
+    border: 1px solid rgba(155,124,255,0.45);
+
+    background: rgba(155,124,255,0.08);
+
+    box-shadow:
+        0 0 15px rgba(155,124,255,0.1);
+}
+
+.furniture-1 {
+    width: 75px;
+    height: 40px;
+
+    left: 85px;
+    top: 115px;
+}
+
+.furniture-2 {
+    width: 38px;
+    height: 38px;
+
+    right: 35px;
+    bottom: 30px;
+}
+
+.furniture-3 {
+    width: 30px;
+    height: 30px;
+
+    left: 40px;
+    bottom: 30px;
+}
+
+.model-overlay {
+    position: absolute;
+
+    left: 18px;
+    right: 18px;
+    bottom: 16px;
+
+    display: flex;
+    justify-content: space-between;
+
+    color: var(--muted);
+
+    font-size: 8px;
+
+    font-weight: 900;
+
+    letter-spacing: 1px;
+}
+
+.model-information {
+    width: min(600px, calc(100% - 40px));
+
+    margin: 0 auto;
+}
+
+.success-label {
+    color: var(--cyan);
+
+    font-size: 9px;
+
+    font-weight: 900;
+
+    letter-spacing: 1.1px;
+}
+
+.model-information h2 {
+    margin-top: 7px;
+
+    font-size: 22px;
+}
+
+.model-stats {
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 8px;
+
+    margin: 20px 0;
+}
+
+.model-stat {
+    padding: 15px;
+
+    text-align: center;
+
+    border-radius: 13px;
+
+    background: rgba(255,255,255,0.035);
+
+    border: 1px solid var(--line);
+}
+
+.model-stat strong {
+    display: block;
+
+    font-size: 19px;
+}
+
+.model-stat span {
+    display: block;
+
+    color: var(--muted);
+
+    font-size: 8px;
+
+    font-weight: 800;
+
+    letter-spacing: 0.8px;
+
+    margin-top: 4px;
+}
+
+
+/* =========================================================
+   AI
+   ========================================================= */
+
+.ai-page {
+    width: min(700px, 100%);
+
+    height: 100vh;
+
+    margin: 0 auto;
+
+    display: flex;
+
+    flex-direction: column;
+}
+
+.ai-header {
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+    padding: 22px 20px;
+
+    border-bottom: 1px solid var(--line);
+}
+
+.ai-title {
+    display: flex;
+
+    align-items: center;
+
+    gap: 11px;
+}
+
+.ai-icon-small {
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background: rgba(155,124,255,0.12);
+
+    color: var(--purple);
+
+    font-size: 20px;
+}
+
+.ai-title h1 {
+    font-size: 15px;
+
+    letter-spacing: 1.5px;
+}
+
+.ai-title p {
+    color: var(--muted);
+
+    font-size: 10px;
+
+    margin-top: 3px;
+}
+
+.chat-messages {
+    flex: 1;
+
+    overflow-y: auto;
+
+    padding: 22px 20px;
+}
+
+.ai-message,
+.user-message {
+    max-width: 88%;
+
+    padding: 14px 16px;
+
+    border-radius: 16px;
+
+    margin-bottom: 12px;
+
+    font-size: 13px;
+
+    line-height: 1.6;
+}
+
+.ai-message {
+    display: flex;
+
+    gap: 10px;
+
+    background: rgba(155,124,255,0.075);
+
+    border: 1px solid rgba(155,124,255,0.13);
+}
+
+.message-icon {
+    color: var(--purple);
+
+    font-weight: 900;
+}
+
+.ai-message p {
+    flex: 1;
+}
+
+.user-message {
+    margin-left: auto;
+
+    background: rgba(255,255,255,0.07);
+
+    border: 1px solid var(--line);
+}
+
+.chat-input-container {
+    display: flex;
+
+    gap: 9px;
+
+    padding:
+        14px
+        max(20px, env(safe-area-inset-right))
+        max(20px, env(safe-area-inset-bottom))
+        max(20px, env(safe-area-inset-left));
+
+    border-top: 1px solid var(--line);
+
+    background: rgba(5,5,9,0.85);
+
+    backdrop-filter: blur(20px);
+}
+
+.chat-input-container input {
+    flex: 1;
+
+    height: 50px;
+
+    padding: 0 15px;
+
+    border-radius: 14px;
+
+    background: rgba(255,255,255,0.055);
+
+    border: 1px solid var(--line);
+
+    color: white;
+}
+
+.chat-input-container button {
+    width: 50px;
+
+    border-radius: 14px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--purple),
+            #6f8dff
+        );
+
+    font-size: 21px;
+}
+
+
+/* =========================================================
+   PREMIUM
+   ========================================================= */
+
+.premium-page {
+    width: min(680px, 100%);
+
+    margin: 0 auto;
+
+    padding:
+        25px
+        max(20px, env(safe-area-inset-right))
+        45px
+        max(20px, env(safe-area-inset-left));
+}
+
+.premium-hero {
+    text-align: center;
+
+    padding: 25px 0 30px;
+}
+
+.premium-icon {
+    width: 70px;
+    height: 70px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 0 auto 15px;
+
+    border-radius: 22px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(155,124,255,0.2),
+            rgba(86,230,255,0.09)
+        );
+
+    border: 1px solid rgba(155,124,255,0.25);
+
+    color: white;
+
+    font-size: 31px;
+
+    box-shadow:
+        0 0 45px rgba(155,124,255,0.13);
+}
+
+.premium-label {
+    color: var(--purple);
+
+    font-size: 9px;
+
+    font-weight: 900;
+
+    letter-spacing: 2px;
+}
+
+.premium-hero h1 {
+    margin-top: 5px;
+
+    font-size: 31px;
+
+    letter-spacing: 2px;
+}
+
+.premium-hero p {
+    color: var(--muted);
+
+    font-size: 12px;
+
+    margin-top: 8px;
+}
+
+.premium-feature-list {
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 8px;
+
+    margin-bottom: 22px;
+}
+
+.premium-feature {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 13px;
+
+    border-radius: 12px;
+
+    background: rgba(255,255,255,0.035);
+
+    border: 1px solid var(--line);
+}
+
+.premium-feature span {
+    color: var(--cyan);
+
+    font-size: 12px;
+
+    font-weight: 900;
+}
+
+.premium-feature p {
+    color: var(--muted-light);
+
+    font-size: 10px;
+
+    line-height: 1.4;
+}
+
+
+.subscription-options {
+    display: grid;
+
+    gap: 9px;
+
+    margin-bottom: 14px;
+}
+
+.subscription-card {
+    position: relative;
+
+    width: 100%;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 17px;
+
+    border-radius: 15px;
+
+    background: rgba(255,255,255,0.035);
+
+    border: 1px solid var(--line);
+
+    text-align: left;
+
+    transition: 0.2s ease;
+}
+
+.subscription-card:hover {
+    border-color: rgba(155,124,255,0.4);
+}
+
+.subscription-card.selected {
+    background: rgba(155,124,255,0.1);
+
+    border-color: rgba(155,124,255,0.55);
+
+    box-shadow:
+        0 0 25px rgba(155,124,255,0.08);
+}
+
+.subscription-info span {
+    display: block;
+
+    color: var(--muted);
+
+    font-size: 8px;
+
+    font-weight: 900;
+
+    letter-spacing: 1px;
+}
+
+.subscription-info strong {
+    display: inline-block;
+
+    margin-top: 4px;
+
+    font-size: 21px;
+}
+
+.subscription-info small {
+    color: var(--muted);
+
+    font-size: 9px;
+
+    margin-left: 4px;
+}
+
+.subscription-radio {
+    color: var(--muted);
+
+    font-size: 23px;
+}
+
+.subscription-card.selected .subscription-radio {
+    color: var(--purple);
+}
+
+.yearly-plan {
+    padding-top: 24px;
+}
+
+.best-value {
+    position: absolute;
+
+    top: 0;
+    left: 17px;
+
+    padding: 5px 8px;
+
+    border-radius: 0 0 7px 7px;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--purple),
+            var(--cyan)
+        );
+
+    color: #08080d;
+
+    font-size: 7px;
+
+    font-weight: 900;
+
+    letter-spacing: 0.7px;
+}
+
+.subscription-note {
+    margin-top: 13px;
+
+    text-align: center;
+
+    color: #656572;
+
+    font-size: 9px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   FLOATING AI
+   ========================================================= */
+
+.ai-floating-button {
+    position: fixed;
+
+    right: 22px;
+    bottom: 22px;
+
+    width: 57px;
+    height: 57px;
+
+    z-index: 30;
+
+    border-radius: 50%;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--purple),
+            var(--blue)
+        );
+
+    color: white;
+
+    font-size: 23px;
+
+    box-shadow:
+        0 10px 35px rgba(105,90,255,0.4);
+
+    animation: aiFloat 3s ease-in-out infinite;
+}
+
+
+/* =========================================================
+   ANIMATIONS
+   ========================================================= */
+
+@keyframes logoShift {
+    0% {
+        background-position: 0% center;
     }
-);
+
+    100% {
+        background-position: 250% center;
+    }
+}
+
+@keyframes glowPulse {
+    0%,
+    100% {
+        opacity: 0.18;
+        transform: scale(0.95);
+    }
+
+    50% {
+        opacity: 0.34;
+        transform: scale(1.08);
+    }
+}
+
+@keyframes gridMove {
+    from {
+        transform:
+            perspective(500px)
+            rotateX(60deg)
+            translateY(0);
+    }
+
+    to {
+        transform:
+            perspective(500px)
+            rotateX(60deg)
+            translateY(55px);
+    }
+}
+
+@keyframes laserMove {
+    0%,
+    100% {
+        opacity: 0.25;
+    }
+
+    50% {
+        opacity: 0.9;
+    }
+}
+
+@keyframes scannerPulse {
+    0%,
+    100% {
+        transform: scale(0.98);
+        box-shadow:
+            0 0 30px rgba(155,124,255,0.1);
+    }
+
+    50% {
+        transform: scale(1.02);
+        box-shadow:
+            0 0 55px rgba(86,180,255,0.18);
+    }
+}
+
+@keyframes aiFloat {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (min-width: 700px) {
+
+    .dashboard-content {
+        padding-top: 35px;
+    }
+
+    .welcome-container {
+        padding-top: 10px;
+    }
+
+    .welcome-features {
+        gap: 16px;
+    }
+
+    .feature-card {
+        padding: 20px;
+    }
+
+    .model-viewer {
+        height: 470px;
+    }
+}
+
+
+@media (max-width: 520px) {
+
+    .premium-feature-list {
+        grid-template-columns: 1fr;
+    }
+
+    .top-bar {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .dashboard-content {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .premium-page {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .model-viewer {
+        height: 330px;
+
+        border-radius: 18px;
+    }
+
+    .model-room {
+        transform:
+            translate(-50%, -50%)
+            perspective(700px)
+            rotateX(58deg)
+            rotateZ(-8deg)
+            scale(0.82);
+    }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+    }
+}
